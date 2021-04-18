@@ -82,15 +82,17 @@ class PedestrianGrid():
         Plots the grid
         '''
 
-        colors = ['white', 'green', 'black', 'lightblue']
+        if self.grid.max() == 3:
+            colors = ['white', 'red', 'lightblue', 'black']
+            label = ['Free space', 'Pedestrian', 'Target', 'Obstacle']
+        else:
+            colors = ['white', 'red', 'lightblue']
+            label = ['Free space', 'Pedestrian', 'Target']
+
         plt.pcolormesh(self.grid, cmap=LinearSegmentedColormap.from_list('', colors))
         legend_elements = [Patch(facecolor=color, edgecolor='black') for color in colors]
-        plt.legend(handles = legend_elements, labels = ['Free space', 
-                                                        'Pedestrian', 
-                                                        'Target', 
-                                                        'Obstacle'], loc="upper left", bbox_to_anchor=[1.02, 1])
+        plt.legend(handles = legend_elements, labels = label, loc="upper left", bbox_to_anchor=[1.02, 1])
 
-        
         plt.yticks(size = self.size[0], fontsize = 'medium')
         plt.xticks(size = self.size[1], fontsize = 'medium')
         plt.show() 

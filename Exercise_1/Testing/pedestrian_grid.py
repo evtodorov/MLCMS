@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.patches import Patch
 import itertools
 import operator
 
@@ -45,8 +47,15 @@ class PedestrianGrid():
 
 
     def plot_grid(self):
-        colormap = colors.ListedColormap(['white', 'green', 'black', 'lightblue'])
-        plt.pcolor(self.grid, cmap=colormap)
+        colors = ['white', 'green', 'black', 'lightblue']
+        plt.pcolormesh(self.grid, cmap=LinearSegmentedColormap.from_list('', colors))
+        legend_elements = [Patch(facecolor=color, edgecolor='black') for color in colors]
+        plt.legend(handles = legend_elements, labels = ['Free space', 
+                                                        'Pedestrian', 
+                                                        'Target', 
+                                                        'Obstacle'], loc="upper left", bbox_to_anchor=[1.02, 1])
+
+        
         plt.yticks(size = self.size[0], fontsize = 'medium')
         plt.xticks(size = self.size[1], fontsize = 'medium')
         plt.show() 

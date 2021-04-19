@@ -26,25 +26,14 @@ class UI(object):
         """
         Initialize a User interface object
 
-        Parameters
-        ----------
-        None.
-        
-        Returns
-        -------
-        UI object
-
+        :param max_frames: (int)
+            Maximum frames in the simulation
         """
         self.max_frames = max_frames
     
-    def start(self):
+    def start_CLI(self):
         '''
-        TODO:
-
-        Returns
-        -------
-        None.
-
+        Start the command-line interface to choose file from a folder
         '''
         self.intro()
         gridarray = self.get_init_condition()
@@ -68,13 +57,10 @@ class UI(object):
         """
         Establish the initial condition from a choice of files
         
-        Parameters
-        ----------
-        ic_pattern (optional) - Glob pattern of initial condition files
+        :param ic_pattern: (string)
+            (optional) - Glob pattern of initial condition files
         
-        Returns
-        -------
-        Numpy array matching the requirements for a grid
+        :return: (np.array)
         """
         print("Choose initial conditions:\n"
               "The following initial conditions match ", ic_pattern,
@@ -115,15 +101,12 @@ class UI(object):
     
     def file2grid(self, fname):
         """
-        Convert a file to a grid, checking the requirements
+        Convert a file to a PedestrianGrid, checking the requirements 
         
-        Parameters
-        ----------
-        fname - file path of the file with initial conditions
+        :param fname: (string)
+            file path of the file with initial conditions
         
-        Returns
-        -------
-        Numpy array matching the requirements for a grid
+        :return: np.array
         """
         gridarray = np.genfromtxt(fname, dtype=int, delimiter=1)
         if (gridarray==1).sum() < 1:
@@ -136,7 +119,7 @@ class UI(object):
         
     def show(self):
         """
-        Show the animatied simulation
+        Show the animatied simulation and save it to .gif
         """
         self.fig = plt.figure()
         self.ax = plt.gca()
@@ -170,5 +153,5 @@ class UI(object):
         raise SystemExit()
         
 if __name__ == "__main__":
-    myUI = UI(max_frames=30)
-    myUI.start()
+    myUI = UI(max_frames=25)
+    myUI.start_CLI()

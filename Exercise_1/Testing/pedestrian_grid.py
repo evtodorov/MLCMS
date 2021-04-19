@@ -6,6 +6,7 @@ from matplotlib.patches import Patch
 import itertools
 import operator
 
+
 class PedestrianGrid():
     '''
     Main class for simulating the crowd
@@ -50,6 +51,22 @@ class PedestrianGrid():
             
         return tmp_grid
 
+    def __check_obstacle(self, pedestrian):
+        ''' 
+        Checks whether a pedestrian stands on an obstacle or not. Returns True if true and False if false.
+
+        :param pedestrian: (tuple) Coordinates for a pedestrian (int, int).
+        '''
+        if self.obstacles is None:
+            return False
+
+        else:
+            for obstacle in self.obstacles:
+                if obstacle[0] == pedestrian[0] and obstacle[1] == pedestrian[1]:
+                    return True
+
+        return False
+        
     def move_pedestrians(self, moving_instructions):
         ''' 
         Moves the pedestrians in accordance with the moving_instructions.
@@ -60,7 +77,7 @@ class PedestrianGrid():
                                     one cell in each direction.
         '''
 
-        if len(moving_instructions) is not len(self.pedestrians):
+        if len(moving_instructions) != len(self.pedestrians):
             print(f'Error in length of the moving instructions, which has to match number of pedestrians. Length of list is {len(moving_instructions)}, expected {len(self.pedestrians)}')
 
         else:
@@ -70,12 +87,12 @@ class PedestrianGrid():
 
                 self.grid[pedestrian] = 0
                 new_pedestrian = tuple(map(operator.add, move, pedestrian))
-                if new_pedestrian[0] < self.size[0] and new_pedestrian[1] < self.size[1]:
+                if new_pedestrian[0] < self.size[0] and new_pedestrian[1] < self.size[1] and not self.__check_obstacle(new_pedestrian):
                     self.pedestrians[i] = new_pedestrian
                     self.grid[new_pedestrian] = 1
                 else:
                     self.grid[pedestrian] = 1
-                    print(f'Can\'t move pedestrian {i} outside the grid, therefore kept at original position')
+                    print(f'Can\'t move pedestrian {i} outside the grid or on an obstacle, therefore kept at original position')
 
     def plot_grid(self):
         '''

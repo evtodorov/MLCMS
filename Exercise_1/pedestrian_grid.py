@@ -7,12 +7,23 @@ import itertools
 import operator
 
 
+NEIGHBOURS = [(-1,-1),(-1,0),(-1,1),
+             (0,-1),        (0,1),
+             (1,-1), (1,0), (1,1)]
+NEIGHBOURS = [(-1,0),(0,-1),(0,1),(1,0)]
+NEIGHBOURS = {i: np.array(n) for i, n in enumerate(NEIGHBOURS)}
+
 class PedestrianGrid():
     '''
     Main class for simulating the crowd
     '''
 
-    def __init__(self, n, m, pedestrians, targets, obstacles = None):
+    def __init__(self, grid = None,
+                       n=None,
+                       m=None, 
+                       pedestrians= None, 
+                       target = None, 
+                       obstacles = None):
         '''
         Initializes the grid on which to simulate the crowd movements as a numpy array with
         free space (coded as 0), pedestrians (coded as 1), targets (coded as 2) and
@@ -26,11 +37,29 @@ class PedestrianGrid():
         :param obstacles: (list) List of tuples (int, int) with coordinates for the obstacles
         '''
         
-        self.size = n, m
-        self.pedestrians = pedestrians
-        self.targets = targets
-        self.obstacles = obstacles
-        self.grid = self.__generate_grid()
+        if grid is not None:
+            self.grid = grid
+            self.size = grid.shape
+            self.pedestrians = list(np.argwhere(grid==1))
+            obstacles = tuple(np.argwhere(grid==3))
+            self.obstacles = obstacles if len(obstacles) else None
+            target = np.argwhere(grid==2)
+            if len(target) > 1: 
+                raise ValueError("excatly one target required")
+            else:
+                self.target = target[0]
+            
+        else:
+            try:
+                self.size = n, m
+                self.pedestrians = [np.array(p) for p in pedestrians]
+                self.target = np.array(target)
+                self.obstacles = [np.array(o) for o in obstacles]
+                self.grid = self.__generate_grid()
+            except NameError as e:
+                print("Wrong!")
+                raise e
+        self.target_neighbours = [tuple((self.target + n)) for n in NEIGHBOURS.values()]
 
     def __generate_grid(self):
         '''
@@ -67,7 +96,7 @@ class PedestrianGrid():
 
         return False
         
-    def move_pedestrians(self, moving_instructions):
+    def move_pedestrians(self, pix, move):
         ''' 
         Moves the pedestrians in accordance with the moving_instructions.
 
@@ -77,22 +106,17 @@ class PedestrianGrid():
                                     one cell in each direction.
         '''
 
-        if len(moving_instructions) != len(self.pedestrians):
-            print(f'Error in length of the moving instructions, which has to match number of pedestrians. Length of list is {len(moving_instructions)}, expected {len(self.pedestrians)}')
+        pedestrian = self.pedestrians[pix]
 
+        self.grid[tuple(pedestrian)] = 0
+        new_pedestrian = pedestrian + move
+        if new_pedestrian[0] >= self.size[0] and new_pedestrian[1] >= self.size[1]:
+            self.grid[tuple(pedestrian)] = 1
+            print(f'Can\'t move pedestrian {pix} outside the grid or on an obstacle, therefore kept at original position')
         else:
-            for i in range(len(moving_instructions)):
-                move = moving_instructions[i]
-                pedestrian = self.pedestrians[i]
-
-                self.grid[pedestrian] = 0
-                new_pedestrian = tuple(map(operator.add, move, pedestrian))
-                if new_pedestrian[0] < self.size[0] and new_pedestrian[1] < self.size[1] and not self.__check_obstacle(new_pedestrian):
-                    self.pedestrians[i] = new_pedestrian
-                    self.grid[new_pedestrian] = 1
-                else:
-                    self.grid[pedestrian] = 1
-                    print(f'Can\'t move pedestrian {i} outside the grid or on an obstacle, therefore kept at original position')
+            self.pedestrians[pix] = new_pedestrian
+            self.grid[tuple(new_pedestrian)] = 1
+            
 
     def plot_grid(self):
         '''
@@ -114,8 +138,40 @@ class PedestrianGrid():
         plt.xticks(size = self.size[1], fontsize = 'medium')
         plt.show() 
 
-    def simulation(self):
-        pass
+    def evolve(self, method='basic'):
 
+
+        a = 2
+        for pix, pedestrian in enumerate(self.pedestrians):
+            if tuple(pedestrian) in self.target_neighbours:
+                continue
+            neighbours_cost = self.cost_function(pedestrian, method)
+            goto_neigbour = NEIGHBOURS[min(neighbours_cost.keys(), key=neighbours_cost.__getitem__)]
+            move = goto_neigbour - pedestrian
+            move = goto_neigbour
+            self.move_pedestrians(pix, move)
+    
+    def cost_function(self, pedestrian, method="basic"):
+        
+        if method=='basic':
+            method = self.basic_cost
+        elif method=="dijkstra":
+            method = self.dijkstra   
+
+        neighbours_cost = {}
+        for i, neighbour in NEIGHBOURS.items():
+            neighbours_cost[i] = method(pedestrian, neighbour)
+        
+        return neighbours_cost
+    
+    def basic_cost(self, pedestrian, neighbour):
+        return np.linalg.norm(self.target - 
+                              (pedestrian + neighbour))
+           
+        
     def dijkstra(self):
         pass
+
+    def simulate(self, max_steps = 100):
+        for i in range(max_steps):
+            self.evolve()

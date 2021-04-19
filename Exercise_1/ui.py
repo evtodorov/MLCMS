@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from matplotlib.animation import FuncAnimation, PillowWriter
-from grid import Grid
+from pedestrian_grid import PedestrianGrid
 
 #constants
 INIT_CONDITIONS_PATTERN = "./ICs/*.txt"
@@ -22,7 +22,7 @@ class UI(object):
     """
     Main User Interface object
     """
-    def __init__(self):
+    def __init__(self, max_frames =  100):
         """
         Initialize a User interface object
 
@@ -35,9 +35,20 @@ class UI(object):
         UI object
 
         """
+        self.max_frames = max_frames
+    
+    def start(self):
+        '''
+        TODO:
+
+        Returns
+        -------
+        None.
+
+        '''
         self.intro()
         gridarray = self.get_init_condition()
-        self.grid = Grid(gridarray)
+        self.grid = PedestrianGrid(gridarray)
         self.show()
         self.exit()
         
@@ -138,7 +149,7 @@ class UI(object):
         self.ax.set_ylim((0,self.grid.size[1]))
         
         self.im = plt.imshow(self.grid.grid, cmap=self.colormap)
-        ani = FuncAnimation(self.fig, self.draw)
+        ani = FuncAnimation(self.fig, self.draw, frames=self.max_frames)
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         ani.save(os.path.join(RESULT_DIR, f"{self.icname}_{timestamp}.gif"),
                  writer = PillowWriter(fps=10))                             
@@ -148,7 +159,7 @@ class UI(object):
         """
         Draw the next frame of the animation
         """
-        self.grid.update()
+        self.grid.evolve()
         self.im.set_data(self.grid.grid)
         return self.im,
     
@@ -159,4 +170,5 @@ class UI(object):
         raise SystemExit()
         
 if __name__ == "__main__":
-    myUI = UI()
+    myUI = UI(max_frames=30)
+    myUI.start()

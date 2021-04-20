@@ -11,6 +11,7 @@ from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
+from matplotlib.patches import Patch
 from matplotlib.animation import FuncAnimation, PillowWriter
 from pedestrian_grid import PedestrianGrid
 
@@ -38,7 +39,7 @@ class UI(object):
         self.intro()
         gridarray = self.get_init_condition()
         self.grid = PedestrianGrid(gridarray)
-        self.show()
+        self.animate()
         self.exit()
         
     def intro(self):
@@ -116,35 +117,65 @@ class UI(object):
         if gridarray.min() < 0 or gridarray.max() > 3:
             raise ValueError("Only values 0, 1, 2, 3 are allowed.")
         return gridarray
-        
-    def show(self):
+    
+    def plot(self, grid):
         """
-        Show the animatied simulation and save it to .gif
+        Plot the underlying object of a pedestrian grid
+
+        :param grid: (np.array)
+            PedestrianGrid.grid array to be plotted
+
+        :return (fig, ax, im): (tuple)
+            Plotted figure, axis and image objects
         """
-        self.fig = plt.figure()
-        self.ax = plt.gca()
-        if self.grid.grid.max() == 3:
+        fig = plt.figure(figsize=(10,10))
+        ax = plt.gca()
+        if grid.max() == 3:
             self.colormap = colors.ListedColormap(['white','green', 'yellow', 'red'])
         else:
             self.colormap = colors.ListedColormap(['white','green', 'yellow'])
         
-        self.ax.set_xlim((0,self.grid.size[0]))
-        self.ax.set_ylim((0,self.grid.size[1]))
+        ax.time_text = ax.text(0.05, 1.01, '', 
+                                         transform=ax.transAxes)
+        litems = [Patch(facecolor=c, edgecolor='black') 
+                      for c in self.colormap.colors]
+        plt.legend(handles = litems, 
+                   labels = ["Empty",
+                             "Pedestrian",
+                             "Target",
+                             "Obstacle"][:len(self.colormap.colors)], 
+                   loc="upper left", 
+                   bbox_to_anchor=[1.02, 1])
+
+        im = plt.imshow(grid, cmap=self.colormap)
+
+        plt.tight_layout()
+        return fig, ax, im
+    
+    def animate(self, fps=10):
+        """
+        Create an animatied simulation and save it to .gif
         
-        self.im = plt.imshow(self.grid.grid, cmap=self.colormap)
+        :param fps:
+            Frames per second of animation
+        """
+        self.fig, self.ax, self.im = self.plot(self.grid.grid)
         ani = FuncAnimation(self.fig, self.draw, frames=self.max_frames)
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         ani.save(os.path.join(RESULT_DIR, f"{self.icname}_{timestamp}.gif"),
-                 writer = PillowWriter(fps=10))                             
-        plt.show()
-    
+                 writer = PillowWriter(fps=fps))                             
+        
     def draw(self,i):
         """
         Draw the next frame of the animation
+        
+        :param i: (int)
+            Frame number
         """
         self.grid.evolve()
         self.im.set_data(self.grid.grid)
-        return self.im,
+        self.ax.time_text.set_text(f"frame = {i}" )
+        return self.im, self.ax.time_text
     
     def exit(self):
         """ 
@@ -153,5 +184,5 @@ class UI(object):
         raise SystemExit()
         
 if __name__ == "__main__":
-    myUI = UI(max_frames=25)
+    myUI = UI(60)
     myUI.start_CLI()

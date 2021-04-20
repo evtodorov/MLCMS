@@ -51,6 +51,7 @@ class PedestrianGrid():
             self.grid = grid
             self.size = grid.shape
             self.pedestrians = list(np.argwhere(grid==1))
+
             obstacles = tuple(np.argwhere(grid==3))
             self.obstacles = obstacles if len(obstacles) else None
             target = np.argwhere(grid==2)
@@ -70,6 +71,8 @@ class PedestrianGrid():
                 raise e
         self.target_neighbours = [tuple((self.target + n)) 
                                   for n in NEIGHBOURS.values()]
+        self.speeds = np.ones(len(self.pedestrians)) #TODO: set speed != 1
+        self.time_credits = np.zeros(len(self.pedestrians))
 
     def __generate_grid(self):
         '''
@@ -111,26 +114,30 @@ class PedestrianGrid():
 
         return False
         
-    def move_pedestrians(self, pix, move):
+    def move_pedestrian(self, pix, move):
         ''' 
-        Moves the pedestrians in accordance with the moving_instructions.
+        Move a pedestrian in accordance with the moving_instructions.
         
         :param pix: (int)
             Index of the pedestrian in self.pedestrians
         :param move: (np.array([int,int])) 
             Distance traveled from the pedestrian in one update
         '''
-        pedestrian = self.pedestrians[pix]
-
-        self.grid[pedestrian[0], pedestrian[1]] = 0
-        new_pedestrian = pedestrian + move
-        if new_pedestrian[0] >= self.size[0] and \
-           new_pedestrian[1] >= self.size[1]:
-            self.grid[pedestrian[0], pedestrian[1]] = 1
-            print(f'Can\'t move pedestrian {pix} outside the grid or on an obstacle, therefore kept at original position')
-        else:
-            self.pedestrians[pix] = new_pedestrian
-            self.grid[new_pedestrian[0], new_pedestrian[1]] = 1
+        # Only make a step if sufficient time credit is available [9] Sec. 3
+        dtau = np.linalg.norm(move)/self.speeds[pix] # dtau = lambda / v
+        if self.time_credits[pix] >= dtau:
+            self.time_credits[pix] -= dtau
+            pedestrian = self.pedestrians[pix]
+            
+            self.grid[pedestrian[0], pedestrian[1]] = 0
+            new_pedestrian = pedestrian + move
+            if new_pedestrian[0] >= self.size[0] and \
+               new_pedestrian[1] >= self.size[1]:
+                self.grid[pedestrian[0], pedestrian[1]] = 1
+                print(f'Can\'t move pedestrian {pix} outside the grid or on an obstacle, therefore kept at original position')
+            else:
+                self.pedestrians[pix] = new_pedestrian
+                self.grid[new_pedestrian[0], new_pedestrian[1]] = 1
 
     def evolve(self, method='basic'):
         """
@@ -142,6 +149,7 @@ class PedestrianGrid():
                 "dijkstra"          Compute path based on Dijsktra's algorithm
         """
         for pix, pedestrian in enumerate(self.pedestrians):
+            self.time_credits[pix] += 1
             if tuple(pedestrian) in self.target_neighbours:
                 continue
             neighbours_cost = self.cost_function(pedestrian, method)
@@ -149,7 +157,7 @@ class PedestrianGrid():
                                            key=neighbours_cost.__getitem__)]
             move = goto_neigbour - pedestrian
             move = goto_neigbour
-            self.move_pedestrians(pix, move)
+            self.move_pedestrian(pix, move)
     
     def cost_function(self, pedestrian, method="basic"):
         """

@@ -1,0 +1,30 @@
+animation: 
+    frame_per_second:       #(int) default 10
+    time_steps_per_frame:   #(int) default 1
+    save:                   #(bool) default true
+    result_dir:             #(str) default "results/" only used if save: True
+simulation: 
+    cell_size:              #(double) in [m] default 1
+    time_step:              #(double) in [s] default 1
+    duration:               #(double) in [s] default 100
+    population:             #(str {"clones" (default) |"similar"|"spread"})
+    seed:                   #(int) default 42
+    algorithm:              #(str {"basic" (default) |"dijkstra"})
+
+    initial_condition: | # Respect the ident!
+        # legend:
+        #   - 0     blank
+        #   - 1     pedestrian
+        #   - 2     target (exactly 1)
+        #   - 3     obstacle
+        00000000000
+        00000100000
+        00000000000
+        00000000000
+        00000000000
+        00000200000
+        00000000000
+        00000000000
+        00000000000
+        00000000000
+        00000000000

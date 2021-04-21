@@ -195,8 +195,20 @@ class PedestrianGrid():
             
         :return: (np.array([int, int]))
         """
-        return np.linalg.norm(self.target - 
-                              (pedestrian + neighbour))
+        huge_cost = 10e6
+        possible_move = pedestrian + neighbour
+
+        cost = np.linalg.norm(self.target - (possible_move))
+
+        if self.obstacles is not None:
+            for obstacle in self.obstacles: 
+                if np.array_equal(possible_move,obstacle):
+                    cost += huge_cost
+
+            
+
+
+        return cost
            
         
     def dijkstra(self):

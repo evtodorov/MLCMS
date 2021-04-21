@@ -64,7 +64,7 @@ class PedestrianGrid():
                 self.size = n, m
                 self.pedestrians = [np.array(p) for p in pedestrians]
                 self.target = np.array(target)
-                self.obstacles = [np.array(o) for o in obstacles]
+                self.obstacles = [np.array(o) for o in obstacles] if obstacles is not None else None
                 self.grid = self.__generate_grid()
             except NameError as e:
                 print("Not enough input parameters for PedestrianGrid.")
@@ -81,16 +81,16 @@ class PedestrianGrid():
         :return: (np.array)
         '''
         tmp_grid = np.zeros((self.size))
-
+        
         for pedestrian in self.pedestrians:
-            tmp_grid[pedestrian] = 1 
+            tmp_grid[tuple(pedestrian)] = 1 
 
-        for target in self.targets:
-            tmp_grid[target] = 2
+        for target in self.target:
+            tmp_grid[tuple(target)] = 2
         
         if self.obstacles is not None:
             for obstacle in self.obstacles:
-                tmp_grid[obstacle] = 3
+                tmp_grid[tuple(obstacle)] = 3
             
         return tmp_grid
 

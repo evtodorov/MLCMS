@@ -130,7 +130,7 @@ class UI(object):
         """
         fig = plt.figure(figsize=(10,10))
         ax = plt.gca()
-        if grid.max() == 3:
+        if np.max(grid) == 3:
             self.colormap = colors.ListedColormap(['white','green', 'yellow', 'red'])
         else:
             self.colormap = colors.ListedColormap(['white','green', 'yellow'])

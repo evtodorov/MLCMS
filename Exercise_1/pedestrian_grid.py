@@ -1,5 +1,9 @@
 import numpy as np
-
+# TODO:
+#   - Implement time_step
+#   - Implement cell_size
+#   = Implement population speeds
+#   - Implement the measurements
 #Constants
 NEIGHBOURS = [(-1,-1),(-1, 0),(-1, 1),
               ( 0,-1),        ( 0, 1),
@@ -85,6 +89,7 @@ class PedestrianGrid():
                                   for n in NEIGHBOURS.values()]
         self.speeds = np.ones(len(self.pedestrians)) #TODO: set speed != 1
         self.time_credits = np.zeros(len(self.pedestrians))
+        #sself.clocks = [Clock() for i in range(len(pedestrians))]
     
     def _generate_grid(self):
         '''
@@ -205,9 +210,9 @@ class PedestrianGrid():
                                                     self.target)
             
         try:
-            if self.grid[tuple(self.planned_paths[pix][0])] == 0:
+            if self.grid[tuple(self.planned_paths[pix].path[0])] == 0:
                 # if the cell is empty, move to it
-                move = self.planned_paths[pix].pop(0) - self.pedestrians[pix]
+                move = self.planned_paths[pix].path.pop(0) - self.pedestrians[pix]
             else:
                 # otherwise recalculate the path to take
                 self.planned_paths[pix] = Dijkstra_path(self.grid, 

@@ -17,7 +17,8 @@ class PedestrianGrid():
                        m = None, 
                        pedestrians = None, 
                        target = None, 
-                       obstacles = None):
+                       obstacles = None,
+                       configs = None):
         '''
         Initializes the grid on which to simulate the crowd movements as a 
         numpy array with:
@@ -38,6 +39,8 @@ class PedestrianGrid():
             List of tuples (int, int) with coordinates for the targets
         :param obstacles: (list) 
             List of tuples (int, int) with coordinates for the obstacles
+        :param configs: (dict)
+            Dictionary of simulation parameters to overwrite the defaults
         
         Usage 1:
         pg = PedestrianGrid(grid=grid)
@@ -47,6 +50,15 @@ class PedestrianGrid():
                             target=target,
                             obstacles = obstacles)
         '''
+        from ui import UI
+        mytempui = UI()
+        for k,v in mytempui.simulation.items():
+            self.__setattr__(k, v)
+            
+        if type(configs) is dict: 
+            for k, v in configs:
+                self.__setattr__(k, v)
+        
         if grid is not None:
             self.grid = grid
             self.size = grid.shape
@@ -65,7 +77,7 @@ class PedestrianGrid():
                 self.pedestrians = [np.array(p) for p in pedestrians]
                 self.target = np.array(target)
                 self.obstacles = [np.array(o) for o in obstacles] if obstacles is not None else None
-                self.grid = self.__generate_grid()
+                self.grid = self._generate_grid()
             except NameError as e:
                 print("Not enough input parameters for PedestrianGrid.")
                 raise e
@@ -73,8 +85,8 @@ class PedestrianGrid():
                                   for n in NEIGHBOURS.values()]
         self.speeds = np.ones(len(self.pedestrians)) #TODO: set speed != 1
         self.time_credits = np.zeros(len(self.pedestrians))
-
-    def __generate_grid(self):
+    
+    def _generate_grid(self):
         '''
         Initialize the grid and mark the cells accordingly
         
@@ -93,26 +105,6 @@ class PedestrianGrid():
                 tmp_grid[tuple(obstacle)] = 3
             
         return tmp_grid
-
-    def __check_obstacle(self, pedestrian):
-        ''' 
-        Checks whether a pedestrian stands on an obstacle or not. 
-        Returns True if true and False if false.
-
-        :param pedestrian: (tuple) 
-            Coordinates for a pedestrian (int, int).
-            
-        :return: (bool)
-        '''
-        if self.obstacles is None:
-            return False
-
-        else:
-            for obstacle in self.obstacles:
-                if obstacle[0] == pedestrian[0] and obstacle[1] == pedestrian[1]:
-                    return True
-
-        return False
         
     def move_pedestrian(self, pix, move):
         ''' 
@@ -152,40 +144,20 @@ class PedestrianGrid():
             self.time_credits[pix] += 1
             if tuple(pedestrian) in self.target_neighbours:
                 continue
-            neighbours_cost = self.cost_function(pedestrian, method)
-            goto_neigbour = NEIGHBOURS[min(neighbours_cost.keys(), 
-                                           key=neighbours_cost.__getitem__)]
-            move = goto_neigbour - pedestrian
-            move = goto_neigbour
+            
+            if method=="basic":
+                move = self.basic_cost(pedestrian)
+            elif method=="dijkstra":
+                move = self.dijkstra(pedestrian, )
+            else:
+                print("No such algorithm!")
+                move = np.array((0,0))
+
             self.move_pedestrian(pix, move)
     
-    def cost_function(self, pedestrian, method="basic"):
+    def basic_cost(self, pedestrian):
         """
-        Compute the cost function for each neighbouring cell
-        
-        :param pedestrian: (np.array([int, int]))
-            Index in the grid of the current pedestrian
-        :param method: (string) 
-            Method to use to compute the evolution. Available methods:
-                "basic" (default)   Compute Euclidean distance at neighbours
-                "dijkstra"          Compute path based on Dijsktra's algorithm
-        
-        :return: (dict)
-        """
-        if method=='basic':
-            method = self.basic_cost
-        elif method=="dijkstra":
-            method = self.dijkstra   
-
-        neighbours_cost = {}
-        for i, neighbour in NEIGHBOURS.items():
-            neighbours_cost[i] = method(pedestrian, neighbour)
-        
-        return neighbours_cost
-    
-    def basic_cost(self, pedestrian, neighbour):
-        """
-        Compute the basic cost based on Euclidean distance between a neigbour
+        Find the best move based on Euclidean distance between each neigbour
         and the target
         
         :param pedestrian: (np.array([int, int]))
@@ -194,26 +166,58 @@ class PedestrianGrid():
             Relative position of the neighbour wrt to the pedestrian
             
         :return: (np.array([int, int]))
+            move relative to the current cell
         """
         huge_cost = 10e6
-        possible_move = pedestrian + neighbour
-
-        cost = np.linalg.norm(self.target - (possible_move))
-
-        if self.obstacles is not None:
-            for obstacle in self.obstacles: 
-                if np.array_equal(possible_move,obstacle):
-                    cost += huge_cost
-
+        
+        
+        neighbours_cost = {}
+        for i, neighbour in NEIGHBOURS.items():
+            possible_move = pedestrian + neighbour
             
+            # get the cost as the Euclidean distance
+            cost = np.linalg.norm(self.target - (possible_move))   
+            # if the neighbour cell is not empty, you can't go there
+            if self.grid[tuple(possible_move)] > 0:
+                cost += huge_cost
+            
+            neighbours_cost[i] = cost
 
-
-        return cost
+        goto_neigbour = NEIGHBOURS[min(neighbours_cost.keys(), 
+                                  key=neighbours_cost.__getitem__)]
+        return goto_neigbour
            
         
-    def dijkstra(self):
-    #TODO:
-        pass
+    def dijkstra(self, pix):
+        """
+        Find the best move based on the precomputed path to the target
+        
+        :param pedestrian: (np.array([int, int]))
+            Index in the grid of the current pedestrian
+            
+        :return: (np.array([int, int]))
+            move relative t
+        """
+        if self.planned_paths[pix] is None:
+        # Plan the path based on Dijsktra if it's not planned yet
+            self.planned_paths[pix] = Dijkstra_path(self.grid, 
+                                                    self.pedestrians[pix],
+                                                    self.target)
+            
+        try:
+            if self.grid[tuple(self.planned_paths[pix][0])] == 0:
+                # if the cell is empty, move to it
+                move = self.planned_paths[pix].pop(0) - self.pedestrians[pix]
+            else:
+                # otherwise recalculate the path to take
+                self.planned_paths[pix] = Dijkstra_path(self.grid, 
+                                                    self.pedestrians[pix],
+                                                    self.target)
+        except IndexError:
+            #No more moves from Dijkstra
+            move = np.array((0,0))
+            
+        return move
 
     def simulate(self, max_steps = 100):
         """

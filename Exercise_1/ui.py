@@ -33,7 +33,7 @@ class UI(object):
         """
         self.animation = {}
         self.max_frames = max_frames
-        self.animation["frame_per_second"] = 10
+        self.animation["frames_per_second"] = 10
         self.animation["time_steps_per_frame"] = 1
         self.animation["save"] = True
         self.animation["result_dir"] = RESULT_DIR
@@ -53,8 +53,8 @@ class UI(object):
         '''
         self.intro()
         gridarray = self.get_init_condition()
-        self.grid = PedestrianGrid(gridarray)
-        self.animate(self.animation['frame_per_second'])
+        self.grid = PedestrianGrid(gridarray, configs=self.simulation)
+        self.animate(self.animation['frames_per_second'])
         self.exit()
         
     def intro(self):
@@ -152,7 +152,11 @@ class UI(object):
             Initial conditions string to be further parsed
         """
         animold = self.animation
-        animnew = config["animation"]
+        try:
+            animnew = config["animation"]
+        except (KeyError, TypeError):
+            animnew = {}
+            print("No animation found - defaults will be used")
         for key, val in animold.items():
             try:#basic presence and type check
                 if animnew[key] is None:
@@ -164,7 +168,11 @@ class UI(object):
                 print(f"Error with animation.{key} - default {animold[key]}")
         
         simold = self.simulation
-        simnew = config["simulation"]
+        try:
+            simnew = config["simulation"]
+        except (KeyError, TypeError):
+            raise ValueError("No simulation.initial_condition found!")
+            
         for key, val in simold.items():
             try:#basic presence and type check
                 if simnew[key] is None:

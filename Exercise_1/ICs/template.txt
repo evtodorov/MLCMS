@@ -1,5 +1,5 @@
 animation: 
-    frame_per_second:       #(int) default 10
+    frames_per_second:      #(int) default 10
     time_steps_per_frame:   #(int) default 1
     save:                   #(bool) default true
     result_dir:             #(str) default "results/" only used if save: True

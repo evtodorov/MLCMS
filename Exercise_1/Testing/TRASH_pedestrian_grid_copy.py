@@ -5,7 +5,7 @@ NEIGHBOURS = [(-1,-1),(-1, 0),(-1, 1),
               ( 0,-1),        ( 0, 1),
               ( 1,-1),( 1, 0),( 1, 1)]
 
-NEIGHBOURS = {i: np.array(n) for i, n in enumerate(NEIGHBOURS)}
+NEIGHBOURS = {i: n for i, n in enumerate(NEIGHBOURS)}
 
 class PedestrianGrid():
     '''
@@ -69,7 +69,7 @@ class PedestrianGrid():
             except NameError as e:
                 print("Not enough input parameters for PedestrianGrid.")
                 raise e
-        self.target_neighbours = [tuple((self.target + n)) 
+        self.target_neighbours = [self.target + n 
                                   for n in NEIGHBOURS.values()]
         self.speeds = np.ones(len(self.pedestrians)) #TODO: set speed != 1
         self.time_credits = np.zeros(len(self.pedestrians))
@@ -150,8 +150,10 @@ class PedestrianGrid():
         """
         for pix, pedestrian in enumerate(self.pedestrians):
             self.time_credits[pix] += 1
-            if tuple(pedestrian) in self.target_neighbours:
-                continue
+            #if tuple(pedestrian) in self.target_neighbours:
+            for target_neighbour in self.target_neighbours:
+                if tuple(pedestrian) != tuple(target_neighbour[0]):
+                    continue
             neighbours_cost = self.cost_function(pedestrian, method)
             goto_neigbour = NEIGHBOURS[min(neighbours_cost.keys(), 
                                            key=neighbours_cost.__getitem__)]
@@ -195,20 +197,8 @@ class PedestrianGrid():
             
         :return: (np.array([int, int]))
         """
-        huge_cost = 10e6
-        possible_move = pedestrian + neighbour
-
-        cost = np.linalg.norm(self.target - (possible_move))
-
-        if self.obstacles is not None:
-            for obstacle in self.obstacles: 
-                if np.array_equal(possible_move,obstacle):
-                    cost += huge_cost
-
-            
-
-
-        return cost
+        return np.linalg.norm(self.target - 
+                              (pedestrian + neighbour))
            
         
     def dijkstra(self):

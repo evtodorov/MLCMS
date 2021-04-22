@@ -17,8 +17,8 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 from pedestrian_grid import PedestrianGrid
 
 #constants
-INIT_CONDITIONS_PATTERN = "./ICs/*.txt"
-RESULT_DIR = "./results"
+INIT_CONDITIONS_PATTERN = "/Users/Julius/Documents/Skola/TUM/Kurser/SS21/MLCMS_GroupB/Exercise_1/ICs/*.txt"
+RESULT_DIR = "/Users/Julius/Documents/Skola/TUM/Kurser/SS21/MLCMS_GroupB/Exercise_1/results"
 
 class UI(object):
     """
@@ -195,7 +195,7 @@ class UI(object):
         fig = plt.figure(figsize=(self.grid.size[0]/10+2,
                                   self.grid.size[1]/10+1))
         ax = plt.gca()
-        if grid.max() == 3:
+        if np.max(grid) == 3:
             self.colormap = colors.ListedColormap(['white','green', 'yellow', 'red'])
         else:
             self.colormap = colors.ListedColormap(['white','green', 'yellow'])

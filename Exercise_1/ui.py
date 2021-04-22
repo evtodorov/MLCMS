@@ -17,8 +17,8 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 from pedestrian_grid import PedestrianGrid
 
 #constants
-INIT_CONDITIONS_PATTERN = "/Users/Julius/Documents/Skola/TUM/Kurser/SS21/MLCMS_GroupB/Exercise_1/ICs/*.txt"
-RESULT_DIR = "/Users/Julius/Documents/Skola/TUM/Kurser/SS21/MLCMS_GroupB/Exercise_1/results"
+INIT_CONDITIONS_PATTERN = "./ICs/*.txt"
+RESULT_DIR = "./results"
 
 class UI(object):
     """

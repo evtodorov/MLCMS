@@ -117,12 +117,20 @@ class PedestrianGrid():
         return tmp_grid
     
     def generate_speeds(self, num_pedestrians, population='clones', seed=42):
-        return np.ones(len(self.pedestrians)) #TODO: set speed != 1 cell/step
+        # Mean free walking speed for men is 1,41 [m/s] and women 1,27 [m/s].
+        # Rought estimation of the std for the plot is that it holds std = 0.25
+        # Should end up with the same
+        mean_speed = (1.41+1.27)/2
+        #return np.ones(len(self.pedestrians)) #TODO: set speed != 1 cell/step
         np.random.seed(seed)
-        if population=='clones':
-            pass
-        for pix in range(num_pedestrians):
-            pass
+        if population == 'clones':
+            return mean_speed*np.ones(len(self.pedestrians)) 
+        elif population == 'width_2':
+            np.random.seed(seed)
+            return np.random.normal(loc=mean_speed, scale=0.25, size=len(self.pedestrians))
+        else:
+            np.random.seed(seed)
+            return np.random.normal(loc=mean_speed, scale=0.5, size=len(self.pedestrians))
     
     def move_pedestrian(self, pix, move):
         ''' 

@@ -88,7 +88,9 @@ class PedestrianGrid():
                 raise e
         self.target_neighbours = [tuple((self.target + n)) 
                                   for n in NEIGHBOURS.values()]
-        self.speeds = np.ones(len(self.pedestrians)) #TODO: set speed != 1
+        self.speeds = self.generate_speeds(len(self.pedestrians),
+                                           self.population,
+                                           self.seed)
         self.time_credits = np.zeros(len(self.pedestrians))
         self.planned_paths = [None]*len(self.pedestrians)
         self.moves_done = [0]*len(self.pedestrians)
@@ -113,7 +115,15 @@ class PedestrianGrid():
                 tmp_grid[tuple(obstacle)] = 3
             
         return tmp_grid
-        
+    
+    def generate_speeds(self, num_pedestrians, population='clones', seed=42):
+        return np.ones(len(self.pedestrians)) #TODO: set speed != 1 cell/step
+        np.random.seed(seed)
+        if population=='clones':
+            pass
+        for pix in range(num_pedestrians):
+            pass
+    
     def move_pedestrian(self, pix, move):
         ''' 
         Move a pedestrian in accordance with the moving_instructions.
@@ -124,7 +134,8 @@ class PedestrianGrid():
             Distance traveled from the pedestrian in one update
         '''
         # Only make a step if sufficient time credit is available [9] Sec. 3
-        dtau = np.linalg.norm(move)/self.speeds[pix] # dtau = lambda / v
+        # dtau = lambda / v
+        dtau = np.linalg.norm(move*self.cell_size)/self.speeds[pix]
         if self.time_credits[pix] >= dtau:
             self.time_credits[pix] -= dtau
             pedestrian = self.pedestrians[pix]
@@ -152,7 +163,7 @@ class PedestrianGrid():
         if method is None:
             method = self.algorithm
         for pix, pedestrian in enumerate(self.pedestrians):
-            self.time_credits[pix] += 1
+            self.time_credits[pix] += self.time_step
             if tuple(pedestrian) in self.target_neighbours:
                 continue
             
@@ -224,7 +235,7 @@ class PedestrianGrid():
                 # if the cell is empty, move to it
                 dijsktra_cell = np.array(path[moves_along_the_path])
                 move = dijsktra_cell - self.pedestrians[pix] 
-            elif path[moves_along_the_path] == 2:
+            elif self.grid[tuple(path[moves_along_the_path])] == 2:
                 raise IndexError #move (0,0) = wait here
             else:
                 # otherwise recalculate the path to take

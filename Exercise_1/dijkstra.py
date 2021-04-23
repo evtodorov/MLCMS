@@ -1,6 +1,6 @@
 import numpy as np
 
-class Dijstra_path:
+class Dijkstra_path:
     def __init__(self, grid, source, dest):
         """
         :param grid: (np.array) nxm
@@ -8,14 +8,16 @@ class Dijstra_path:
         :param dest: (np.array) 2
 
         """
-        graph = self.make_adj(grid.flatten())
-        self.path = self.dijkstra(graph, tuple(source), tuple(dest))
         self.size = grid.shape
+        graph = self.make_adj(grid.flatten())
 
-    def __getitem__(self):
-        pass
+        self.path = self.dijkstra(graph, tuple(source), tuple(dest))
 
     def make_adj(self,pixel_list):
+        """
+        TODO: add dosstring
+
+        """
         num_pixels = self.size[0] * self.size[1]
         adj_matrix = np.zeros((num_pixels, num_pixels))
         neigh_str = [(-1, 0), (0, -1), (0, 1), (1, 0)]
@@ -39,9 +41,9 @@ class Dijstra_path:
                 if i == j:
                     adj_matrix[i][j] = 0
                 elif self.is_str_neigh(i, j, pixel_id_list, neigh_str):
-                    adj_matrix[i][j] = 1
+                    adj_matrix[i][j] = .5
                 elif self.is_dia_neigh(i, j, pixel_id_list, neigh_dia):
-                    adj_matrix[i][j] = 0.5
+                    adj_matrix[i][j] = 1
                 else:
                     adj_matrix[i][j] = np.Inf
 
@@ -62,6 +64,10 @@ class Dijstra_path:
         return t_graph
 
     def is_str_neigh(self,i, j, p_list, neigh):
+        """
+        TODO: add dosstring
+
+        """
         row_cmp = p_list[i]
         col_cmp = p_list[j]
 
@@ -82,6 +88,10 @@ class Dijstra_path:
             return False
 
     def dijkstra(self, graph, start, goal):
+        """
+        TODO: add dosstring
+
+        """
         shortest_distance = {}
         track_predecessor = {}
         unseenNodes = graph
@@ -94,7 +104,6 @@ class Dijstra_path:
             # print(node)
             shortest_distance[node] = infinity
         shortest_distance[start] = 0
-        print(shortest_distance)
 
         while unseenNodes:
             min_dist_node = None
@@ -123,8 +132,10 @@ class Dijstra_path:
         track_path.insert(0, start)
 
         if shortest_distance[goal] != infinity:
-            print("--------------------------------------------------------------------------------------")
-            print("Shortest distnace is : " + str(shortest_distance[goal]))
-            print("Optimal path is " + str(track_path))
+            #print("--------------------------------------------------------------------------------------")
+            #print("Shortest distnace is : " + str(shortest_distance[goal]))
+            #print("Optimal path is " + str(track_path))
 
             return track_path
+        else:
+            print("Target not reachable.")

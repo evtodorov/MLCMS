@@ -1,4 +1,5 @@
 import numpy as np
+from dijkstra import Dijkstra_path
 # TODO:
 #   - Implement time_step
 #   - Implement cell_size
@@ -6,7 +7,7 @@ import numpy as np
 #   - Implement the measurements
 #Constants
 NEIGHBOURS = [(-1,-1),(-1, 0),(-1, 1),
-              ( 0,-1),        ( 0, 1),
+              ( 0,-1),( 0, 0),( 0, 1),
               ( 1,-1),( 1, 0),( 1, 1)]
 
 NEIGHBOURS = {i: np.array(n) for i, n in enumerate(NEIGHBOURS)}
@@ -60,7 +61,7 @@ class PedestrianGrid():
             self.__setattr__(k, v)
             
         if type(configs) is dict: 
-            for k, v in configs:
+            for k, v in configs.items():
                 self.__setattr__(k, v)
         
         if grid is not None:
@@ -89,6 +90,8 @@ class PedestrianGrid():
                                   for n in NEIGHBOURS.values()]
         self.speeds = np.ones(len(self.pedestrians)) #TODO: set speed != 1
         self.time_credits = np.zeros(len(self.pedestrians))
+        self.planned_paths = [None]*len(self.pedestrians)
+        self.moves_done = [0]*len(self.pedestrians)
         #sself.clocks = [Clock() for i in range(len(pedestrians))]
     
     def _generate_grid(self):
@@ -135,8 +138,9 @@ class PedestrianGrid():
             else:
                 self.pedestrians[pix] = new_pedestrian
                 self.grid[new_pedestrian[0], new_pedestrian[1]] = 1
+                self.moves_done[pix] += 1
 
-    def evolve(self, method='basic'):
+    def evolve(self, method=None):
         """
         Advance the position of all pedestrians by one timestep
         
@@ -145,6 +149,8 @@ class PedestrianGrid():
                 "basic" (default)   Compute Euclidean distance at neighbours
                 "dijkstra"          Compute path based on Dijsktra's algorithm
         """
+        if method is None:
+            method = self.algorithm
         for pix, pedestrian in enumerate(self.pedestrians):
             self.time_credits[pix] += 1
             if tuple(pedestrian) in self.target_neighbours:
@@ -153,11 +159,11 @@ class PedestrianGrid():
             if method=="basic":
                 move = self.basic_cost(pedestrian)
             elif method=="dijkstra":
-                move = self.dijkstra(pedestrian, )
+                move = self.dijkstra(pix)
             else:
                 print("No such algorithm!")
                 move = np.array((0,0))
-
+            
             self.move_pedestrian(pix, move)
     
     def basic_cost(self, pedestrian):
@@ -183,7 +189,8 @@ class PedestrianGrid():
             # get the cost as the Euclidean distance
             cost = np.linalg.norm(self.target - (possible_move))   
             # if the neighbour cell is not empty, you can't go there
-            if self.grid[tuple(possible_move)] > 0:
+            if self.grid[tuple(possible_move)] > 0 and \
+               np.linalg.norm(neighbour) != 0:
                 cost += huge_cost
             
             neighbours_cost[i] = cost
@@ -210,17 +217,24 @@ class PedestrianGrid():
                                                     self.target)
             
         try:
-            if self.grid[tuple(self.planned_paths[pix].path[0])] == 0:
+
+            path = self.planned_paths[pix].path
+            moves_along_the_path = self.moves_done[pix] + 1
+            if self.grid[tuple(path[moves_along_the_path])] == 0:
                 # if the cell is empty, move to it
-                move = self.planned_paths[pix].path.pop(0) - self.pedestrians[pix]
+                dijsktra_cell = np.array(path[moves_along_the_path])
+                move = dijsktra_cell - self.pedestrians[pix] 
+            elif path[moves_along_the_path] == 2:
+                raise IndexError #move (0,0) = wait here
             else:
                 # otherwise recalculate the path to take
                 self.planned_paths[pix] = Dijkstra_path(self.grid, 
                                                     self.pedestrians[pix],
                                                     self.target)
+                raise IndexError #move (0,0) = wait here
         except IndexError:
             #No more moves from Dijkstra
-            move = np.array((0,0))
+            move = np.array((0,0)) #move (0,0) = wait here
             
         return move
 

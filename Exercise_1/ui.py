@@ -233,10 +233,11 @@ class UI(object):
             Frames per second of animation
         """
         self.fig, self.ax, self.im = self.plot(self.grid.grid)
+        total_frames = int(self.simulation['duration']/self.simulation['time_step'])
         ani = FuncAnimation(self.fig, 
                             self.draw,
                             fargs = (self.animation['time_steps_per_frame'],),
-                            frames=self.max_frames)
+                            frames= total_frames)
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         if self.animation["save"]:
             ani.save(os.path.join(self.animation["result_dir"],

@@ -1,5 +1,6 @@
 import numpy as np
 from dijkstra import Dijkstra_path
+from clock import Clock
 # TODO:
 #   - Implement time_step
 #   - Implement cell_size
@@ -94,7 +95,10 @@ class PedestrianGrid():
         self.time_credits = np.zeros(len(self.pedestrians))
         self.planned_paths = [None]*len(self.pedestrians)
         self.moves_done = [0]*len(self.pedestrians)
-        #sself.clocks = [Clock() for i in range(len(pedestrians))]
+        if self.clocks is not None:
+            self.clock_list = [ [Clock(cell_size=self.cell_size, **clock) 
+                                 for clock in self.clocks]
+                            for i in range(len(self.pedestrians))]
     
     def _generate_grid(self):
         '''
@@ -184,6 +188,11 @@ class PedestrianGrid():
                 move = np.array((0,0))
             
             self.move_pedestrian(pix, move)
+            
+            if self.clocks is not None:
+                for clock in self.clock_list[pix]:
+                    if clock.check(self.pedestrians[pix]):
+                        clock.tick(self.time_step)
     
     def basic_cost(self, pedestrian):
         """

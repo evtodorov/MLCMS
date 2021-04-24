@@ -188,6 +188,23 @@ class UI(object):
         except KeyError:
             raise ValueError("The file must contain initial condition!")
         
+        try: 
+            if type(simnew['clocks']) is not list:
+                print("simulation.clocks must be a list! See the template.")
+            else:
+                for i,clock in enumerate(simnew['clocks']):
+                    keys = clock.keys()
+                    if 'top_left' not in keys or \
+                       'bottom_right' not in keys or \
+                       'report_configs' not in keys:
+                           print(f'Error defining clock #{i}. '
+                                 'No clocks accepted.')
+                           raise KeyError()
+                simold['clocks'] = simnew['clocks']
+        except KeyError as e:
+            simold['clocks'] = None
+            print(simnew)
+        
         return io.StringIO(initial_condition)
     
     def plot(self, grid):

@@ -2,7 +2,7 @@ animation:
     frames_per_second:      #(int) default 10
     time_steps_per_frame:   #(int) default 1
     save:                   #(bool) default true
-    result_dir:             #(str) default "results/" only used if save: True
+    result_dir:             #(str) default "results/" only used if save: True   
 simulation: 
     cell_size:              #(double) in [m] default 1
     time_step:              #(double) in [s] default 1
@@ -10,7 +10,13 @@ simulation:
     population:             #(str {"clones" (default) |"similar"|"spread"})
     seed:                   #(int) default 42
     algorithm:              #(str {"basic" (default) |"dijkstra"})
-
+    clocks:                 # optional
+        -   top_left: [3,0]
+            bottom_right: [5,10]
+            report_configs: 'v = {speed} m/s'
+        -   top_left: [0,0]
+            bottom_right: [10,10]
+            report_configs: '{speed},{time},{entry},{exit}'
     initial_condition: | # Respect the ident!
         # legend:
         #   - 0     blank
@@ -22,9 +28,9 @@ simulation:
         00000000000
         00000000000
         00000000000
+        00000000000
+        00000000000
+        00000000000
+        00000000000
         00000200000
-        00000000000
-        00000000000
-        00000000000
-        00000000000
         00000000000

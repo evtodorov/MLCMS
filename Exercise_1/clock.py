@@ -95,7 +95,8 @@ class Clock(object):
         :return: (string)
             Clock measurement report based on report_configs in the consturctor
         '''
-        exit_point = self.exit if self.exit else self.last_checked_cell
+        exit_point = self.exit if self.exit is not None \
+                               else self.last_checked_cell
         distance = ((exit_point[0]-self.entry[0])**2 + \
                     (exit_point[1]-self.entry[1])**2)**0.5*self.cell_size
         try:
@@ -106,7 +107,8 @@ class Clock(object):
                                           distance = distance,
                                           time = self.timer,
                                           entry = self.entry,
-                                          exit = exit_point)
+                                          exit = exit_point,
+                                          finished = self.finished)
     
 # Test
 if __name__ == "__main__":

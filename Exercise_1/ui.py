@@ -55,6 +55,7 @@ class UI(object):
         gridarray = self.get_init_condition()
         self.grid = PedestrianGrid(gridarray, configs=self.simulation)
         self.animate(self.animation['frames_per_second'])
+        self.report()
         self.exit()
         
     def intro(self):
@@ -203,7 +204,6 @@ class UI(object):
                 simold['clocks'] = simnew['clocks']
         except KeyError as e:
             simold['clocks'] = None
-            print(simnew)
         
         return io.StringIO(initial_condition)
     
@@ -217,15 +217,17 @@ class UI(object):
         :return (fig, ax, im): (tuple)
             Plotted figure, axis and image objects
         """
-        fig = plt.figure(figsize=(self.grid.size[0]/10+2,
-                                  self.grid.size[1]/10+1))
+        n, m = self.grid.size
+        dx = self.grid.cell_size
+        fig = plt.figure(figsize=(n/10+3,m/10+2))
         ax = plt.gca()
         if np.max(grid) == 3:
             self.colormap = colors.ListedColormap(['white','green', 'yellow', 'red'])
         else:
             self.colormap = colors.ListedColormap(['white','green', 'yellow'])
-        
-        ax.time_text = ax.text(0.05, 1.01, '', 
+          
+        ax.xaxis.set_ticks_position("top")
+        ax.time_text = ax.text(0.05, -0.05, '', 
                                          transform=ax.transAxes)
         litems = [Patch(facecolor=c, edgecolor='black') 
                       for c in self.colormap.colors]
@@ -237,10 +239,12 @@ class UI(object):
                    loc="upper left", 
                    bbox_to_anchor=[1.02, 1])
 
-        im = plt.imshow(grid, cmap=self.colormap)
+        im = plt.imshow(grid, cmap=self.colormap, interpolation='none',
+                        extent = [0, n*dx, m*dx, 0])
 
         plt.tight_layout()
         return fig, ax, im
+    
     
     def animate(self, fps=10):
         """
@@ -253,8 +257,10 @@ class UI(object):
         total_frames = int(self.simulation['duration']/self.simulation['time_step'])
         ani = FuncAnimation(self.fig, 
                             self.draw,
+                            init_func = lambda: (self.im,),
                             fargs = (self.animation['time_steps_per_frame'],),
-                            frames= total_frames)
+                            frames= total_frames,
+                            blit = True)
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         if self.animation["save"]:
             ani.save(os.path.join(self.animation["result_dir"],
@@ -265,7 +271,7 @@ class UI(object):
         
     def draw(self,i, tpf=1):
         """
-        Draw the next frame of the animation
+        Draw the frame and advance hthe simulation
         
         :param i: (int)
             Frame number
@@ -275,15 +281,26 @@ class UI(object):
         :return im: (plt.Image)
         :return ax.time_text: (plt.Text)
         """
-        if tpf==1:
-            self.grid.evolve()
-        else:
-            self.grid.simulate(tpf)
-            
         self.im.set_data(self.grid.grid)
         dt = self.simulation['time_step']
         self.ax.time_text.set_text(f"frame = {i}; t = {i*tpf*dt} s" )
+        
+        self.grid.simulate(tpf)
+            
         return self.im, self.ax.time_text
+    
+    def report(self):
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        if self.grid.clocks is None:
+            print("No clocks in this simulation. Nothing to report.")
+            return None
+        for i in range(len(self.grid.clocks)):
+            filename = os.path.join(self.animation["result_dir"],
+                          f"{self.icname}_{timestamp}_clock{i}.txt")
+            with open(filename, 'w') as f:
+                for j in range(len(self.grid.clock_list)):
+                    f.write(self.grid.clock_list[j][i].report())
+                    f.write("\n")
     
     def exit(self):
         """ 

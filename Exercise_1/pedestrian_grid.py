@@ -89,8 +89,7 @@ class PedestrianGrid():
                 raise e
         self.target_neighbours = [tuple((self.target + n)) 
                                   for n in NEIGHBOURS.values()]
-        self.speeds = self.generate_speeds(len(self.pedestrians),
-                                           self.population,
+        self.speeds = self.generate_speeds(self.population,
                                            self.seed)
         self.time_credits = np.zeros(len(self.pedestrians))
         self.planned_paths = [None]*len(self.pedestrians)
@@ -120,21 +119,34 @@ class PedestrianGrid():
             
         return tmp_grid
     
-    def generate_speeds(self, num_pedestrians, population='clones', seed=42):
+    def generate_speeds(self, population='clones', seed=42):
+        ''' 
+        Generate a distribution of walking speeds
+        
+        :param population: (string) {'clones', 'spread', 'similar'}
+            Chose how spread-out the population will be
+        :param seed: (int)
+            Seed for the random number generator
+        :return: (np.array)
+            Walking speed per pedestrian
+        '''
         # Mean free walking speed for men is 1,41 [m/s] and women 1,27 [m/s].
         # Rought estimation of the std for the plot is that it holds std = 0.25
         # Should end up with the same
         mean_speed = (1.41+1.27)/2
-        #return np.ones(len(self.pedestrians)) #TODO: set speed != 1 cell/step
         np.random.seed(seed)
         if population == 'clones':
             return mean_speed*np.ones(len(self.pedestrians)) 
-        elif population == 'width_2':
+        elif population == 'similar':
+            np.random.seed(seed)
+            return np.random.normal(loc=mean_speed, scale=0.05, size=len(self.pedestrians))
+        elif population == 'spread':
             np.random.seed(seed)
             return np.random.normal(loc=mean_speed, scale=0.25, size=len(self.pedestrians))
         else:
-            np.random.seed(seed)
-            return np.random.normal(loc=mean_speed, scale=0.5, size=len(self.pedestrians))
+            print(f"Unknown population parameter {population}, 'clones' will "
+                  "be used instead")
+            return self.generate_speeds('clones', seed)
     
     def move_pedestrian(self, pix, move):
         ''' 
@@ -148,12 +160,13 @@ class PedestrianGrid():
         # Only make a step if sufficient time credit is available [9] Sec. 3
         # dtau = lambda / v
         dtau = np.linalg.norm(move*self.cell_size)/self.speeds[pix]
-        if self.time_credits[pix] >= dtau:
+        pedestrian = self.pedestrians[pix]
+        new_pedestrian = pedestrian + move
+        if self.time_credits[pix] >= dtau and \
+           self.grid[new_pedestrian[0], new_pedestrian[1]] == 0:
             self.time_credits[pix] -= dtau
-            pedestrian = self.pedestrians[pix]
-            
             self.grid[pedestrian[0], pedestrian[1]] = 0
-            new_pedestrian = pedestrian + move
+            
             if new_pedestrian[0] >= self.size[0] and \
                new_pedestrian[1] >= self.size[1]:
                 self.grid[pedestrian[0], pedestrian[1]] = 1

@@ -2,7 +2,8 @@ animation:
     frames_per_second:      #(int) default 10
     time_steps_per_frame:   #(int) default 1
     save:                   #(bool) default true
-    result_dir:             #(str) default "results/" only used if save: True   
+    result_dir:             #(str) default "results/" only used if save: True 
+    skip: true  
 simulation: 
     cell_size:              #(double) in [m] default 1
     time_step:              #(double) in [s] default 1

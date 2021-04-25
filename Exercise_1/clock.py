@@ -31,7 +31,9 @@ class Clock(object):
             parameters to report are:
                 {time}      - time elapsed with the clock active [s]
                 {entry}     - etnry point of the clock (cell Ids)
+                {t0}        - starting time of the clock
                 {exit}      - exit point of the clock  (cells Ids)
+                {t1}        - finishing time of the clock
                 {distance}  - distance between the entry and exit points [m]
                 {speed}     - average speed between entry and exit points [m/s]
                 {finished}  - did the clock stop*
@@ -44,12 +46,14 @@ class Clock(object):
         self.cell_size = cell_size
         self.timer = 0
         self.started = False
-        self.finished = False
+        self.t0 = 0
         self.entry = None
+        self.finished = False
         self.exit = None
+        self.t1 = 1e9
         self.last_checked_cell = None
     
-    def check(self, cell):
+    def check(self, cell, time):
         '''
         Check if a cell belongs to a clocking area and handle starting/stopping
         the clock.
@@ -67,15 +71,19 @@ class Clock(object):
         if not self.started and clocking:
             self.started = True
             self.entry = cell
+            self.t0 = time
         if self.started and not self.finished and not clocking:
             self.finished = True
             self.exit = cell
+            self.t1 = time
         if self.started and self.finished and clocking:
             #restart timer
             self.time = 0
             self.finished = False
             self.entry = cell
+            self.t0 = time
             self.exit = None
+            self.t1 = 1e9
         return clocking
     
     def tick(self, dt):
@@ -95,6 +103,8 @@ class Clock(object):
         :return: (string)
             Clock measurement report based on report_configs in the consturctor
         '''
+        if not self.started:
+            return None
         exit_point = self.exit if self.exit is not None \
                                else self.last_checked_cell
         distance = ((exit_point[0]-self.entry[0])**2 + \
@@ -108,14 +118,16 @@ class Clock(object):
                                           time = self.timer,
                                           entry = self.entry,
                                           exit = exit_point,
-                                          finished = self.finished)
+                                          finished = self.finished,
+                                          t0 = self.t0,
+                                          t1 = self.t1)
     
 # Test
 if __name__ == "__main__":
     c = Clock((1,1),(10,10),1,'{time:.2f},{speed:.2f},{entry},{exit},{distance}')
     moves = [(i+2,i) for i in range(20)]
-    for cell in moves:
-        if c.check(cell):
+    for i, cell in enumerate(moves):
+        if c.check(cell, i*0.2):
             c.tick(0.2)
     print(c.report())
             

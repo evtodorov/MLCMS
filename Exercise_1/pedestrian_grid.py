@@ -98,6 +98,7 @@ class PedestrianGrid():
             self.clock_list = [ [Clock(cell_size=self.cell_size, **clock) 
                                  for clock in self.clocks]
                             for i in range(len(self.pedestrians))]
+        self.time = 0
     
     def _generate_grid(self):
         '''
@@ -185,6 +186,7 @@ class PedestrianGrid():
                 "basic" (default)   Compute Euclidean distance at neighbours
                 "dijkstra"          Compute path based on Dijsktra's algorithm
         """
+        self.time += self.time_step
         if method is None:
             method = self.algorithm
         for pix, pedestrian in enumerate(self.pedestrians):
@@ -204,7 +206,7 @@ class PedestrianGrid():
             
             if self.clocks is not None:
                 for clock in self.clock_list[pix]:
-                    if clock.check(self.pedestrians[pix]):
+                    if clock.check(self.pedestrians[pix], self.time):
                         clock.tick(self.time_step)
     
     def basic_cost(self, pedestrian):

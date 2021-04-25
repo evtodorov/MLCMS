@@ -37,6 +37,7 @@ class UI(object):
         self.animation["time_steps_per_frame"] = 1
         self.animation["save"] = True
         self.animation["result_dir"] = RESULT_DIR
+        self.animation["skip"] = False
         
         self.simulation = {}
         self.simulation["cell_size"] = 1.0 #m
@@ -217,7 +218,7 @@ class UI(object):
         :return (fig, ax, im): (tuple)
             Plotted figure, axis and image objects
         """
-        n, m = self.grid.size
+        m, n = self.grid.size
         dx = self.grid.cell_size
         fig = plt.figure(figsize=(n/10+3,m/10+2))
         ax = plt.gca()
@@ -253,8 +254,14 @@ class UI(object):
         :param fps:
             Frames per second of animation
         """
+        if self.animation["skip"]:
+            self.grid.simulate(int(self.simulation["duration"]/
+                                   self.simulation["time_step"]))
+            return
         self.fig, self.ax, self.im = self.plot(self.grid.grid)
-        total_frames = int(self.simulation['duration']/self.simulation['time_step'])
+        total_frames = int(self.simulation['duration']/
+                           self.simulation['time_step']/
+                           self.animation['time_steps_per_frame'])
         ani = FuncAnimation(self.fig, 
                             self.draw,
                             init_func = lambda: (self.im,),
@@ -299,8 +306,10 @@ class UI(object):
                           f"{self.icname}_{timestamp}_clock{i}.txt")
             with open(filename, 'w') as f:
                 for j in range(len(self.grid.clock_list)):
-                    f.write(self.grid.clock_list[j][i].report())
-                    f.write("\n")
+                    line = self.grid.clock_list[j][i].report()
+                    if line is not None:
+                        f.write(line)
+                        f.write("\n")
     
     def exit(self):
         """ 

@@ -232,10 +232,16 @@ class PedestrianGrid():
             # get the cost as the Euclidean distance
             cost = np.linalg.norm(self.target - (possible_move))   
             # if the neighbour cell is not empty, you can't go there
-            if self.grid[tuple(possible_move)] > 0 and \
-               np.linalg.norm(neighbour) != 0:
-                cost += huge_cost
-            
+
+            # If possible_move lies outisde the grid we get an error
+            try:
+                if self.grid[tuple(possible_move)] > 0 and \
+                np.linalg.norm(neighbour) != 0:
+                    cost += huge_cost
+            except IndexError:
+                continue
+
+
             neighbours_cost[i] = cost
 
         goto_neigbour = NEIGHBOURS[min(neighbours_cost.keys(), 

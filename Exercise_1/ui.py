@@ -220,7 +220,7 @@ class UI(object):
         """
         m, n = self.grid.size
         dx = self.grid.cell_size
-        fig = plt.figure(figsize=(n/10+3,m/10+2))
+        fig = plt.figure(figsize=(n/10+3,m/10+3))
         ax = plt.gca()
         if np.max(grid) == 3:
             self.colormap = colors.ListedColormap(['white','green', 'yellow', 'red'])
@@ -230,6 +230,13 @@ class UI(object):
         ax.xaxis.set_ticks_position("top")
         ax.time_text = ax.text(0.05, -0.05, '', 
                                          transform=ax.transAxes)
+
+        label = ax.set_xlabel('[m]', fontsize = 12)
+        ax.xaxis.set_label_coords(1.05, 1.05)
+        label = ax.set_ylabel('[m]', fontsize = 12)
+        ax.yaxis.set_label_coords(-0.05, -0.05)
+
+
         litems = [Patch(facecolor=c, edgecolor='black') 
                       for c in self.colormap.colors]
         plt.legend(handles = litems, 

@@ -15,7 +15,12 @@ class Dijkstra_path:
 
     def make_adj(self,pixel_list):
         """
-        TODO: add dosstring
+        Make the 2D dense Numpy matrix into an adjacency matrix,
+        and later converted into a Nested dictionary,
+        which is passed to the dijkstra's algorithm.
+
+        :param pixel_list: (list)
+        pixel_list is the flattened 2D dense matrix of the grid
 
         """
         num_pixels = self.size[0] * self.size[1]
@@ -26,7 +31,6 @@ class Dijkstra_path:
         obstacle_list = []
         pixel_id_list = []
 
-        # This code needs to be copied into the main dijkstra's algorithm function
         pixel_dict = {}
         for i in range(self.size[0]):
             for j in range(self.size[1]):
@@ -65,7 +69,16 @@ class Dijkstra_path:
 
     def is_str_neigh(self,i, j, p_list, neigh):
         """
-        TODO: add dosstring
+        For a set of two tuples i and j we need to see if j is a von Neumann neighbour of i
+
+        :param i: (tuple)
+        One of the tuples to check if there is a neighbourhood between i and j
+        :param j: (tuple)
+        One of the tuples to check if there is a neighbourhood between i and j
+        :param p_list: (list)
+        It is a list of ID used to locate each tuple in the grid.
+        :param neigh: (list)
+        It is the list of neighbours in which we check the given tuple is a neighbour
 
         """
         row_cmp = p_list[i]
@@ -78,6 +91,12 @@ class Dijkstra_path:
             return False
 
     def is_dia_neigh(self,i, j, p_list, neigh):
+        """
+        For a set of two tuples i and j we need to see if j is a diagonal neighbour of i
+
+        :param i, j, p_list, neigh
+        All the neighbours similar to the ones used in is_str_neigh.
+        """
         row_cmp = p_list[i]
         col_cmp = p_list[j]
 
@@ -89,7 +108,16 @@ class Dijkstra_path:
 
     def dijkstra(self, graph, start, goal):
         """
-        TODO: add dosstring
+        The function is used to create the shortest path spanning tree between two nodes
+        in the graph, find the cost and return the path as a list of tuples,
+        using the Dijkstra's algorithm.
+
+        :param graph: (dictionary)
+        The parameter is a nested dictionary that is used to see the edges of each of the nodes.
+        :param start: (tuple)
+        The tuple which is the id for the vertex from where the path should start
+        :param goal: (tuple)
+        The tuple which is the id for the vertex where the path should end
 
         """
         shortest_distance = {}

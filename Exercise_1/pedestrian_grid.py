@@ -1,11 +1,7 @@
 import numpy as np
 from dijkstra import Dijkstra_path
 from clock import Clock
-# TODO:
-#   - Implement time_step
-#   - Implement cell_size
-#   = Implement population speeds
-#   - Implement the measurements
+
 #Constants
 NEIGHBOURS = [(-1,-1),(-1, 0),(-1, 1),
               ( 0,-1),( 0, 0),( 0, 1),

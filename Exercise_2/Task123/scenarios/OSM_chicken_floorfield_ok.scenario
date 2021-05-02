@@ -1,5 +1,5 @@
 {
-  "name" : "chicken_floorfield_ok",
+  "name" : "OSM_chicken_floorfield_ok",
   "description" : "",
   "release" : "1.15",
   "processWriters" : {

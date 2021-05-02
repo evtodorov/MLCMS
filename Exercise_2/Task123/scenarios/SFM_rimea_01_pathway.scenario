@@ -1,5 +1,5 @@
 {
-  "name" : "basic_1_chicken_gnm2",
+  "name" : "SFM_rimea_01_pathway",
   "description" : "",
   "release" : "1.15",
   "processWriters" : {
@@ -9,10 +9,10 @@
     "isWriteMetaData" : false
   },
   "scenario" : {
-    "mainModel" : "org.vadere.simulator.models.gnm.GradientNavigationModel",
+    "mainModel" : "org.vadere.simulator.models.sfm.SocialForceModel",
     "attributesModel" : {
       "org.vadere.state.attributes.models.AttributesFloorField" : {
-        "createMethod" : "NONE",
+        "createMethod" : "HIGH_ACCURACY_FAST_MARCHING",
         "potentialFieldResolution" : 0.1,
         "obstacleGridPenalty" : 0.1,
         "targetAttractionStrength" : 1.0,
@@ -32,7 +32,13 @@
           "height" : 1.0
         }
       },
-      "org.vadere.state.attributes.models.AttributesGNM" : {
+      "org.vadere.state.attributes.models.AttributesPotentialSFM" : {
+        "pedestrianBodyPotential" : 2.72,
+        "pedestrianRecognitionDistance" : 0.3,
+        "obstacleBodyPotential" : 10.0,
+        "obstacleRepulsionStrength" : 0.2
+      },
+      "org.vadere.state.attributes.models.AttributesSFM" : {
         "attributesODEIntegrator" : {
           "solverType" : "DORMAND_PRINCE_45",
           "stepSizeMin" : 1.0E-4,
@@ -40,20 +46,14 @@
           "toleranceAbsolute" : 1.0E-5,
           "toleranceRelative" : 1.0E-4
         },
-        "floorGradientProviderType" : "FLOOR_EUCLIDEAN_CONTINUOUS",
+        "floorGradientProviderType" : "FLOOR_EIKONAL_DISCRETE",
         "targetPotentialModel" : "org.vadere.simulator.models.potential.fields.PotentialFieldTargetGrid",
-        "pedestrianPotentialModel" : "org.vadere.simulator.models.gnm.PotentialFieldPedestrianGNM",
-        "obstaclePotentialModel" : "org.vadere.simulator.models.gnm.PotentialFieldObstacleGNM"
-      },
-      "org.vadere.state.attributes.models.AttributesPotentialGNM" : {
-        "pedestrianBodyPotential" : 3.59,
-        "pedestrianRecognitionDistance" : 0.7,
-        "obstacleBodyPotential" : 20.1,
-        "obstacleRepulsionStrength" : 0.25
+        "pedestrianPotentialModel" : "org.vadere.simulator.models.sfm.PotentialFieldPedestrianSFM",
+        "obstaclePotentialModel" : "org.vadere.simulator.models.sfm.PotentialFieldObstacleSFM"
       }
     },
     "attributesSimulation" : {
-      "finishTime" : 200.0,
+      "finishTime" : 1300.0,
       "simTimeStepLength" : 0.4,
       "realTimeSimTimeRatio" : 0.0,
       "writeSimulationData" : true,
@@ -76,51 +76,24 @@
         "bounds" : {
           "x" : 0.0,
           "y" : 0.0,
-          "width" : 35.0,
-          "height" : 60.0
+          "width" : 45.0,
+          "height" : 3.0
         },
         "boundingBoxWidth" : 0.5,
         "bounded" : true,
         "referenceCoordinateSystem" : null
       },
-      "obstacles" : [ {
-        "shape" : {
-          "x" : 10.0,
-          "y" : 40.0,
-          "width" : 15.0,
-          "height" : 1.0,
-          "type" : "RECTANGLE"
-        },
-        "id" : -1
-      }, {
-        "shape" : {
-          "x" : 9.0,
-          "y" : 21.0,
-          "width" : 1.0,
-          "height" : 20.0,
-          "type" : "RECTANGLE"
-        },
-        "id" : -1
-      }, {
-        "shape" : {
-          "x" : 25.0,
-          "y" : 21.0,
-          "width" : 1.0,
-          "height" : 20.0,
-          "type" : "RECTANGLE"
-        },
-        "id" : -1
-      } ],
+      "obstacles" : [ ],
       "measurementAreas" : [ ],
       "stairs" : [ ],
       "targets" : [ {
         "id" : 1,
         "absorbing" : true,
         "shape" : {
-          "x" : 10.0,
-          "y" : 51.0,
-          "width" : 15.0,
-          "height" : 5.0,
+          "x" : 42.0,
+          "y" : 0.7,
+          "width" : 1.5,
+          "height" : 1.6,
           "type" : "RECTANGLE"
         },
         "waitingTime" : 0.0,
@@ -136,18 +109,18 @@
       "sources" : [ {
         "id" : -1,
         "shape" : {
-          "x" : 10.0,
-          "y" : 6.0,
-          "width" : 15.0,
-          "height" : 5.0,
+          "x" : 1.0,
+          "y" : 1.0,
+          "width" : 1.0,
+          "height" : 1.0,
           "type" : "RECTANGLE"
         },
         "interSpawnTimeDistribution" : "org.vadere.state.scenario.ConstantDistribution",
-        "distributionParameters" : [ 1.0 ],
-        "spawnNumber" : 200,
+        "distributionParameters" : [ 30.0 ],
+        "spawnNumber" : 1,
         "maxSpawnNumberTotal" : -1,
         "startTime" : 0.0,
-        "endTime" : 0.0,
+        "endTime" : 1200.0,
         "spawnAtRandomPositions" : true,
         "spawnAtGridPositionsCA" : false,
         "useFreeSpaceOnly" : true,

@@ -1,5 +1,5 @@
 {
-  "name" : "basic_1_chicken_gnm1",
+  "name" : "GNM_rimea_06_corner",
   "description" : "",
   "release" : "1.15",
   "processWriters" : {
@@ -53,7 +53,7 @@
       }
     },
     "attributesSimulation" : {
-      "finishTime" : 200.0,
+      "finishTime" : 100.0,
       "simTimeStepLength" : 0.4,
       "realTimeSimTimeRatio" : 0.0,
       "writeSimulationData" : true,
@@ -62,7 +62,7 @@
       "digitsPerCoordinate" : 2,
       "useFixedSeed" : true,
       "fixedSeed" : 1,
-      "simulationSeed" : 1
+      "simulationSeed" : 0
     },
     "attributesPsychology" : {
       "usePsychologyLayer" : false,
@@ -76,37 +76,28 @@
         "bounds" : {
           "x" : 0.0,
           "y" : 0.0,
-          "width" : 35.0,
-          "height" : 60.0
+          "width" : 14.0,
+          "height" : 18.0
         },
-        "boundingBoxWidth" : 0.5,
+        "boundingBoxWidth" : 1.0,
         "bounded" : true,
         "referenceCoordinateSystem" : null
       },
       "obstacles" : [ {
         "shape" : {
-          "x" : 10.0,
-          "y" : 40.0,
-          "width" : 15.0,
+          "x" : 0.8,
+          "y" : 3.0,
+          "width" : 10.2,
           "height" : 1.0,
           "type" : "RECTANGLE"
         },
         "id" : -1
       }, {
         "shape" : {
-          "x" : 9.0,
-          "y" : 21.0,
+          "x" : 10.0,
+          "y" : 4.0,
           "width" : 1.0,
-          "height" : 20.0,
-          "type" : "RECTANGLE"
-        },
-        "id" : -1
-      }, {
-        "shape" : {
-          "x" : 25.0,
-          "y" : 21.0,
-          "width" : 1.0,
-          "height" : 20.0,
+          "height" : 9.0,
           "type" : "RECTANGLE"
         },
         "id" : -1
@@ -117,10 +108,10 @@
         "id" : 1,
         "absorbing" : true,
         "shape" : {
-          "x" : 10.0,
-          "y" : 51.0,
-          "width" : 15.0,
-          "height" : 5.0,
+          "x" : 11.0,
+          "y" : 15.0,
+          "width" : 2.0,
+          "height" : 2.0,
           "type" : "RECTANGLE"
         },
         "waitingTime" : 0.0,
@@ -136,15 +127,15 @@
       "sources" : [ {
         "id" : -1,
         "shape" : {
-          "x" : 10.0,
-          "y" : 6.0,
-          "width" : 15.0,
-          "height" : 5.0,
+          "x" : 1.2,
+          "y" : 1.2,
+          "width" : 6.0,
+          "height" : 1.6,
           "type" : "RECTANGLE"
         },
         "interSpawnTimeDistribution" : "org.vadere.state.scenario.ConstantDistribution",
         "distributionParameters" : [ 1.0 ],
-        "spawnNumber" : 200,
+        "spawnNumber" : 20,
         "maxSpawnNumberTotal" : -1,
         "startTime" : 0.0,
         "endTime" : 0.0,

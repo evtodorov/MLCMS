@@ -118,7 +118,16 @@
         },
         "id" : 4
       } ],
-      "measurementAreas" : [ ],
+      "measurementAreas" : [ {
+        "shape" : {
+          "x" : 10.0,
+          "y" : 32.0,
+          "width" : 15.0,
+          "height" : 8.0,
+          "type" : "RECTANGLE"
+        },
+        "id" : 1
+      } ],
       "stairs" : [ ],
       "targets" : [ {
         "id" : 1,
@@ -151,7 +160,7 @@
         },
         "interSpawnTimeDistribution" : "org.vadere.state.scenario.ConstantDistribution",
         "distributionParameters" : [ 1.0 ],
-        "spawnNumber" : 200,
+        "spawnNumber" : 400,
         "maxSpawnNumberTotal" : -1,
         "startTime" : 0.0,
         "endTime" : 0.0,

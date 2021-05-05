@@ -19,6 +19,10 @@
       "type" : "org.vadere.simulator.projects.dataprocessing.outputfile.EventtimePedestrianIdOutputFile",
       "filename" : "postvis.traj",
       "processors" : [ 7, 8 ]
+    }, {
+      "type" : "org.vadere.simulator.projects.dataprocessing.outputfile.EventtimePedestrianIdOutputFile",
+      "filename" : "SIRinformation.csv",
+      "processors" : [ 9 ]
     } ],
     "processors" : [ {
       "type" : "org.vadere.simulator.projects.dataprocessing.processor.PedestrianWaitingTimeProcessor",
@@ -60,6 +64,9 @@
     }, {
       "type" : "org.vadere.simulator.projects.dataprocessing.processor.FootStepTargetIDProcessor",
       "id" : 8
+    }, {
+      "type" : "org.vadere.simulator.projects.dataprocessing.processor.FootStepGroupIDProcessor",
+      "id" : 9
     } ],
     "isTimestamped" : true,
     "isWriteMetaData" : false

@@ -134,9 +134,9 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 		if (c.getElements().size() > 0) {
 			// TODO: fill in code to assign pedestrians in the scenario at the beginning (i.e., not created by a source)
             //  to INFECTED or SUSCEPTIBLE groups.
-			for(Pedestrian p : c.getElements()) {
-				assignToGroup(p);
-			} 
+			//for(Pedestrian p : c.getElements()) {
+			//	assignToGroup(p);
+			//} 
 		}
 	}
 
@@ -192,8 +192,11 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 			for(Pedestrian p : c.getElements()) {
 				// loop over neighbors and set infected if we are close
 				for(Pedestrian p_neighbor : c.getElements()) {
+					
 					if(p == p_neighbor || getGroup(p_neighbor).getID() != SIRType.ID_INFECTED.ordinal())
+					// if I am my neighour or my neibour is not infected - go to the next pedestrian
 						continue;
+
 					double dist = p.getPosition().distance(p_neighbor.getPosition());
 					if (dist < attributesSIRG.getInfectionMaxDistance() &&
 							this.random.nextDouble() < attributesSIRG.getInfectionRate()) {

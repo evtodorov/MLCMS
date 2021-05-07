@@ -41,23 +41,40 @@ def create_folder_data_scatter(folder):
     """
     file_path = os.path.join(folder, "SIRinformation.csv")
     if not os.path.exists(file_path):
+        print("wrong name of file")
         return None
     data = pd.read_csv(file_path, delimiter=" ")
 
-    print(data)
 
     ID_SUSCEPTIBLE = 1
     ID_INFECTED = 0
     ID_REMOVED = 2
 
     group_counts = file_df_to_count_df(data, ID_INFECTED=ID_INFECTED, ID_SUSCEPTIBLE=ID_SUSCEPTIBLE)
+    if group_counts['group-r'].sum() == 0:
     # group_counts.plot()
-    scatter_s = go.Scatter(x=group_counts['simTime'],
-                           y=group_counts['group-s'],
-                           name='susceptible ' + os.path.basename(folder),
-                           mode='lines')
-    scatter_i = go.Scatter(x=group_counts['simTime'],
-                           y=group_counts['group-i'],
-                           name='infected ' + os.path.basename(folder),
-                           mode='lines')
-    return [scatter_s, scatter_i], group_counts
+        scatter_s = go.Scatter(x=group_counts['simTime'],
+                               y=group_counts['group-s']+group_counts['group-i'],
+                               name='susceptible ' + os.path.basename(folder),
+                               mode='lines', fill='tozeroy')
+        scatter_i = go.Scatter(x=group_counts['simTime'],
+                               y=group_counts['group-i'],
+                               name='infected ' + os.path.basename(folder),
+                               mode='lines', fill='tozeroy')
+        return [scatter_s, scatter_i], group_counts
+    else:
+        scatter_r = go.Scatter(x=group_counts['simTime'],
+                               y=group_counts['group-i']+group_counts['group-s']+group_counts['group-i'],
+                               name='recovered ' + os.path.basename(folder),
+                               mode='lines', fill='tozeroy')
+        scatter_s = go.Scatter(x=group_counts['simTime'],
+                               y=group_counts['group-s'],
+                               name='susceptible ' + os.path.basename(folder),
+                               mode='lines', fill='tozeroy')
+        scatter_i = go.Scatter(x=group_counts['simTime'],
+                               y=group_counts['group-i'],
+                               name='infected ' + os.path.basename(folder),
+                               mode='lines', fill='tozeroy')
+        return [scatter_r, scatter_s, scatter_i], group_counts
+                               
+    

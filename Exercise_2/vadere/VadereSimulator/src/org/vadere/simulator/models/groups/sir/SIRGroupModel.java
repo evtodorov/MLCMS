@@ -190,6 +190,14 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 
 		if (c.getElements().size() > 0) {
 			for(Pedestrian p : c.getElements()) {
+				// Might recover
+				if (this.random.nextDouble() < attributesSIRG.getRecoveryRate()) {
+					SIRGroup g = getGroup(p);
+					if (g.getID() == SIRType.ID_INFECTED.ordinal()) {
+						elementRemoved(p);
+						assignToGroup(p, SIRType.ID_REMOVED.ordinal());
+					}
+				}
 				// loop over neighbors and set infected if we are close
 				for(Pedestrian p_neighbor : c.getElements()) {
 					if(p == p_neighbor || getGroup(p_neighbor).getID() != SIRType.ID_INFECTED.ordinal())

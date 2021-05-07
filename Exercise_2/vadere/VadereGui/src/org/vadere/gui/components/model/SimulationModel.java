@@ -108,13 +108,13 @@ public abstract class SimulationModel<T extends DefaultSimulationConfig> extends
 		int groupId = ped.getGroupIds().getFirst();
 		Color c = colorMap.get(groupId);
 		if (c == null) {
-			if (groupId == SIRType.ID_INFECTED) {
+			if (groupId == SIRType.ID_INFECTED.ordinal()) {
 				c = new Color(254, 74, 73); // Sick red
 			}
-			else if (groupId == SIRType.ID_SUSCEPTIBLE) {
+			else if (groupId == SIRType.ID_SUSCEPTIBLE.ordinal()) {
 				c = new Color(254, 215, 102); // Danger yellow
 			}
-			else if (groupId == SIRType.ID_REMOVED) {
+			else if (groupId == SIRType.ID_REMOVED.ordinal()) {
 				c = new Color(42, 183, 202); // Safe blue
 			}
 			else {

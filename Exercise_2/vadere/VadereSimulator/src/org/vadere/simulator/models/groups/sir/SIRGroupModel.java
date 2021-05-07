@@ -16,6 +16,7 @@ import org.vadere.state.attributes.scenario.AttributesAgent;
 import org.vadere.state.scenario.DynamicElementContainer;
 import org.vadere.state.scenario.Pedestrian;
 import org.vadere.state.scenario.Topography;
+import org.vadere.util.geometry.LinkedCellsGrid;
 
 import java.util.*;
 
@@ -187,11 +188,15 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 	public void update(final double simTimeInSec) {
 		// check the positions of all pedestrians and switch groups to INFECTED (or REMOVED).
 		DynamicElementContainer<Pedestrian> c = topography.getPedestrianDynamicElements();
-
+		LinkedCellsGrid<Pedestrian> grid = c.getCellsElements();
+		double infectionRaidus = attributesSIRG.getInfectionMaxDistance(); 
+		// TODO: implement time step correction of the infection and recovery rate probability
+		double IR_time_step_correction = 1.0;
+		double RR_time_step_correction = 1.0;
 		if (c.getElements().size() > 0) {
 			for(Pedestrian p : c.getElements()) {
 				// Might recover
-				if (this.random.nextDouble() < attributesSIRG.getRecoveryRate()) {
+				if (this.random.nextDouble() < attributesSIRG.getRecoveryRate()*RR_time_step_correction) {
 					SIRGroup g = getGroup(p);
 					if (g.getID() == SIRType.ID_INFECTED.ordinal()) {
 						elementRemoved(p);
@@ -199,15 +204,14 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 					}
 				}
 				// loop over neighbors and set infected if we are close
-				for(Pedestrian p_neighbor : c.getElements()) {
+				for(Pedestrian p_neighbor : grid.getObjects(p.getPosition(), infectionRaidus)) {
 					
 					if(p == p_neighbor || getGroup(p_neighbor).getID() != SIRType.ID_INFECTED.ordinal())
 					// if I am my neighour or my neibour is not infected - go to the next pedestrian
 						continue;
 
-					double dist = p.getPosition().distance(p_neighbor.getPosition());
-					if (dist < attributesSIRG.getInfectionMaxDistance() &&
-							this.random.nextDouble() < attributesSIRG.getInfectionRate()) {
+
+					if (this.random.nextDouble() < attributesSIRG.getInfectionRate()*IR_time_step_correction) {
 						SIRGroup g = getGroup(p);
 						if (g.getID() == SIRType.ID_SUSCEPTIBLE.ordinal()) {
 							elementRemoved(p);

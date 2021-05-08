@@ -29,7 +29,7 @@ def file_df_to_count_df(df,
             group_counts[name] = valcounts.loc[:,id]
         except KeyError:
             group_counts[name] = 0
-    return group_counts
+    return group_counts.fillna(0)
 
 
 def create_folder_data_scatter(folder):

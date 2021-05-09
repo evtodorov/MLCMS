@@ -1,5 +1,5 @@
 {
-  "name" : "Supermarket_1",
+  "name" : "Supermarket_r=1.20_p=60",
   "description" : "",
   "release" : "1.15",
   "processWriters" : {
@@ -85,13 +85,13 @@
       },
       "org.vadere.state.attributes.models.AttributesSIRG" : {
         "infectionsAtStart" : 10,
-        "infectionRate" : 0.01,
-        "recoveryRate" : 0.005,
+        "infectionRate" : 0.02,
+        "recoveryRate" : 5.0E-4,
         "infectionMaxDistance" : 1.0
       }
     },
     "attributesSimulation" : {
-      "finishTime" : 90.0,
+      "finishTime" : 270.0,
       "simTimeStepLength" : 0.4,
       "realTimeSimTimeRatio" : 0.1,
       "writeSimulationData" : true,

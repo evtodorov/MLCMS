@@ -4,36 +4,17 @@
   "release" : "1.15",
   "processWriters" : {
     "files" : [ {
-      "type" : "org.vadere.simulator.projects.dataprocessing.outputfile.PedestrianIdOutputFile",
-      "filename" : "waitingTimes.txt",
-      "processors" : [ ]
-    }, {
-      "type" : "org.vadere.simulator.projects.dataprocessing.outputfile.TimestepPedestrianIdOverlapOutputFile",
-      "filename" : "out.txt",
-      "processors" : [ 3 ]
-    }, {
-      "type" : "org.vadere.simulator.projects.dataprocessing.outputfile.NoDataKeyOutputFile",
-      "filename" : "out1.txt",
-      "processors" : [ ]
-    }, {
       "type" : "org.vadere.simulator.projects.dataprocessing.outputfile.EventtimePedestrianIdOutputFile",
       "filename" : "postvis.traj",
       "processors" : [ 7, 8 ]
     }, {
       "type" : "org.vadere.simulator.projects.dataprocessing.outputfile.EventtimePedestrianIdOutputFile",
-      "filename" : "SIRinformation.csv",
-      "processors" : [ 9 ]
+      "filename" : "SIRInformation.csv",
+      "processors" : [ 8, 9 ]
     } ],
     "processors" : [ {
       "type" : "org.vadere.simulator.projects.dataprocessing.processor.PedestrianOverlapProcessor",
       "id" : 3
-    }, {
-      "type" : "org.vadere.simulator.projects.dataprocessing.processor.MaxOverlapProcessor",
-      "id" : 5,
-      "attributesType" : "org.vadere.state.attributes.processor.AttributesMaxOverlapProcessor",
-      "attributes" : {
-        "pedestrianOverlapProcessorId" : 3
-      }
     }, {
       "type" : "org.vadere.simulator.projects.dataprocessing.processor.FootStepProcessor",
       "id" : 7
@@ -95,6 +76,7 @@
       "org.vadere.state.attributes.models.AttributesSIRG" : {
         "infectionsAtStart" : 20,
         "infectionRate" : 0.01,
+        "recoveryRate" : 0.0,
         "infectionMaxDistance" : 1.0
       },
       "org.vadere.state.attributes.models.AttributesPotentialCompactSoftshell" : {
@@ -109,9 +91,9 @@
       }
     },
     "attributesSimulation" : {
-      "finishTime" : 90.0,
+      "finishTime" : 55.0,
       "simTimeStepLength" : 0.4,
-      "realTimeSimTimeRatio" : 1.0,
+      "realTimeSimTimeRatio" : 0.1,
       "writeSimulationData" : true,
       "visualizationEnabled" : true,
       "printFPS" : false,

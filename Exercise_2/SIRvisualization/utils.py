@@ -54,25 +54,35 @@ def create_folder_data_scatter(folder):
     # group_counts.plot()
         scatter_s = go.Scatter(x=group_counts['simTime'],
                                y=group_counts['group-s']+group_counts['group-i'],
-                               name='susceptible ' + os.path.basename(folder),
+                               name='susceptible', 
+                               fillcolor = 'rgba(254, 215, 102, 0.7)',
+                               line=dict(color='#fed766'),
                                mode='lines', fill='tozeroy')
         scatter_i = go.Scatter(x=group_counts['simTime'],
                                y=group_counts['group-i'],
-                               name='infected ' + os.path.basename(folder),
+                               name='infected ', 
+                               fillcolor = 'rgba(254, 74, 73, 0.5)',
+                               line=dict(color='#fe4a49'),
                                mode='lines', fill='tozeroy')
         return [scatter_s, scatter_i], group_counts
     else:
         scatter_r = go.Scatter(x=group_counts['simTime'],
                                y=group_counts['group-r']+group_counts['group-s']+group_counts['group-i'],
-                               name='recovered ' + os.path.basename(folder),
+                               name='recovered',
+                               fillcolor = 'rgba(42, 183, 202, 0.5)',
+                               line=dict(color='#2ab7ca'),
                                mode='lines', fill='tozeroy')
         scatter_s = go.Scatter(x=group_counts['simTime'],
                                y=group_counts['group-s'],
-                               name='susceptible ' + os.path.basename(folder),
+                               name='susceptible ', 
+                               fillcolor = 'rgba(254, 215, 102, 0.7)',
+                               line=dict(color='#fed766'),
                                mode='lines', fill='tozeroy')
         scatter_i = go.Scatter(x=group_counts['simTime'],
                                y=group_counts['group-i'],
-                               name='infected ' + os.path.basename(folder),
+                               name='infected', 
+                               fillcolor = 'rgba(254, 74, 73, 0.5)',
+                               line=dict(color='#fe4a49'),
                                mode='lines', fill='tozeroy')
         return [scatter_r, scatter_s, scatter_i], group_counts
                                

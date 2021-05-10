@@ -27,7 +27,7 @@ def file_df_to_count_df(df,
     for name, id in {'group-s':ID_SUSCEPTIBLE, 'group-i':ID_INFECTED, 'group-r': ID_REMOVED}.items():
         try:
             group_counts[name] = valcounts.loc[:,id]
-        except KeyError:
+        except:
             group_counts[name] = 0
     return group_counts.fillna(0)
 

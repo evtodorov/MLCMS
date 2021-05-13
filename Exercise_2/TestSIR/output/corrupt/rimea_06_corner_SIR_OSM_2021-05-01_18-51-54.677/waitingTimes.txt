@@ -1,1 +1,0 @@
-pedestrianId waitingTimeStart-PID1

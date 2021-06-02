@@ -12,12 +12,13 @@ def pca_svd_from_file():
     pca_scaled_values = preprocessing.scale(pca_text_file.T)
 
     pca_object = PCA()
+    #pca_values = pca_scaled_values.to_numpy()
 
-    pca_values = pca_scaled_values.to_numpy()
-    return pca_values
+    return pca_scaled_values
 
 #plt.plot(pca_values)
 
 #print(pca_results.fit(pca_values))
+# pca_values = pca_scaled_values.to_numpy()
 
 

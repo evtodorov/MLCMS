@@ -3,7 +3,7 @@ from scipy.spatial import distance_matrix
 from scipy.sparse.linalg import eigsh
 import numpy as np
 
-def diffusion_map(data, N, k):
+def diffusion_map(data, k):
     """
     Function that calculates and returns the eigenvalues and eigenvectors/functions of the
     Laplace applied on data. 
@@ -13,15 +13,12 @@ def diffusion_map(data, N, k):
     
     :param data: (np.array with np.shape = (dim, N))
         The data we wish to do reduce
-
-    :param N: (int)
-        Number of data points in data
     
     :param k: (int)
-        Number of eigen
+        Number of eigenvalues and eigenvectors/functions
 
     """
-
+    N = np.shape(data)[0]
 
     # Step 1
     D = distance_matrix(data, data) 
@@ -31,6 +28,8 @@ def diffusion_map(data, N, k):
 
     # Step 3
     W = np.exp(-np.square(D)/epsilon)
+    
+    # Step 4
     P = W.sum(axis=0)*np.identity(N)
     
     # Step 5

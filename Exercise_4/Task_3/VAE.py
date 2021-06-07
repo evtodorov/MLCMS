@@ -28,7 +28,7 @@ class VAE:
         :param latent_params: (int)
             Size of the latent parameter space
         :param deep_layers: (list) defaults to [256, 256]
-            Architechture of the hidden layers of the encoder and decoder (same for both).
+            Architechture of the hidden layers of the encoder and decoder (decoder being mirrored).
             The number of entries determines the number of hidden layers. 
             The values are the size of each layer
         :param learning_rate: (float) default to 0.001
@@ -101,7 +101,7 @@ class VAE:
         :return: (tfd.Distribution)
         """
         flat_size = np.prod(data_shape)
-        for layer in self.deep_layers:
+        for layer in reversed(self.deep_layers):
             z = tf.layers.dense(z, layer, tf.nn.relu)
         means =  tf.reshape(tf.layers.dense(z, flat_size, tf.nn.sigmoid), [-1] + data_shape)
         variances = self.variance*tf.ones(data_shape)

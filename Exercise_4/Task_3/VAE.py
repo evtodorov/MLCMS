@@ -105,7 +105,7 @@ class VAE:
             z = tf.layers.dense(z, layer, tf.nn.relu)
         means =  tf.reshape(tf.layers.dense(z, flat_size, tf.nn.sigmoid), [-1] + data_shape)
         variances = self.variance*tf.ones(data_shape)
-        return tfd.Independent(tfd.MultivariateNormalDiag(means, variances),1)
+        return tfd.Independent(tfd.MultivariateNormalDiag(means, variances),len(data_shape)-1)
         
     def plot_latent(self, codes, labels, epoch):
         """

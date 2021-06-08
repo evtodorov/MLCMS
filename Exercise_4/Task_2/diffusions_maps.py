@@ -34,7 +34,7 @@ def diffusion_map(data, k):
     
     # Step 5
     inv_P = np.linalg.inv(P) 
-    K = np.dot(inv_P,W).dot(inv_P)
+    K = np.dot(inv_P, np.dot(W,inv_P))
 
     # Step 6
     Q = K.sum(axis=0)*np.identity(N)
@@ -42,7 +42,7 @@ def diffusion_map(data, k):
     # Step 7
     inv_Q_sq = np.zeros(Q.shape)
     np.fill_diagonal(inv_Q_sq, 1/(Q.diagonal()**0.5))
-    T = np.dot(inv_Q_sq,K).dot(inv_Q_sq)
+    T = np.dot(inv_Q_sq, np.dot(K, inv_Q_sq))
     
     # Step 8
     a_l, v_l = eigsh(T, k)

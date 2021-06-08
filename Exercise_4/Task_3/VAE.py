@@ -19,7 +19,7 @@ class MNIST:
         self.Y_test  = Y_test
 
 class VAE:
-    def __init__(self, data_shape, latent_params, deep_layers = [256, 256], learning_rate=0.001):
+    def __init__(self, data_shape, latent_params, deep_layers = [256, 256], learning_rate=0.001, name=''):
         """
         Wrapper class for Variational Auto Encoder
         
@@ -28,11 +28,13 @@ class VAE:
         :param latent_params: (int)
             Size of the latent parameter space
         :param deep_layers: (list) defaults to [256, 256]
-            Architechture of the hidden layers of the encoder and decoder (same for both).
+            Architechture of the hidden layers of the encoder and decoder (decoder being mirrored).
             The number of entries determines the number of hidden layers. 
             The values are the size of each layer
         :param learning_rate: (float) default to 0.001
             Learning rate of the Adams optimizer used to minimize the ELBO
+        :param name: str default to ''
+            Additional naming identifier for the model
         :return: (object)
             Wrapper class
         """
@@ -53,6 +55,10 @@ class VAE:
         self.divergence = tfd.kl_divergence(self.posterior, self.prior)
         self.elbo = tf.reduce_mean(self.likelihood - self.divergence)
         self.optimize = tf.train.AdamOptimizer(self.learning_rate).minimize(-self.elbo)
+        #prepare saver
+        self.name = name
+        self.saver = tf.train.Saver()
+        self.save_path = f'./saved-models/VAE{self.name}_{self.data_shape}_{self.deep_layers}_{self.latent_params_size}'
         
     def make_prior(self, latent_params_size):
         """
@@ -95,11 +101,11 @@ class VAE:
         :return: (tfd.Distribution)
         """
         flat_size = np.prod(data_shape)
-        for layer in self.deep_layers:
+        for layer in reversed(self.deep_layers):
             z = tf.layers.dense(z, layer, tf.nn.relu)
         means =  tf.reshape(tf.layers.dense(z, flat_size, tf.nn.sigmoid), [-1] + data_shape)
         variances = self.variance*tf.ones(data_shape)
-        return tfd.Independent(tfd.MultivariateNormalDiag(means, variances),1)
+        return tfd.Independent(tfd.MultivariateNormalDiag(means, variances),len(data_shape)-1)
         
     def plot_latent(self, codes, labels, epoch):
         """
@@ -123,7 +129,7 @@ class VAE:
         plt.colorbar(sc, ticks=sorted(np.unique(labels)), label='digit')
         plt.title(f'Epoch {epoch}: Latent space')
 
-    def plot_samples(self, fig, samples):
+    def plot_samples(self, fig, samples, ptype):
         """
         Plot samples from the prior
 
@@ -131,13 +137,20 @@ class VAE:
             Figure to plot on
         :param samples: (np.array)
             Array of samples to plot
+        :param ptype: (str)
+            Type of plotting to used
         """
-        for index, sample in enumerate(samples,start=1):
-            ax = fig.add_subplot(3,len(samples),index)
-            ax.imshow(sample, cmap='gray')
-            ax.axis('off')
+        if ptype=='imshow':
+            for index, sample in enumerate(samples,start=1):
+                ax = fig.add_subplot(3,len(samples),index)
+                ax.imshow(sample, cmap='gray')
+                ax.axis('off')
+        elif ptype=='scatter':
+            ax = plt.subplot(131)
+            ax.scatter(samples[:,0],samples[:,1])
+            ax.set_aspect('equal')
         
-    def plot_encode_decode(self, fig, inputs, outputs):
+    def plot_encode_decode(self, fig, inputs, outputs, ptype):
         """
         Plot inputs before encoding and after decoding 
 
@@ -147,14 +160,24 @@ class VAE:
             Array of inputs to plot
         :param outputs: (np.array)
             Array of outputs to plot
+        :param ptype: (str)
+            Type of plotting to used
         """
-        for i, (inp, out) in enumerate(zip(inputs, outputs),start=1):
-            axe = fig.add_subplot(3,len(inputs),len(inputs)+i)
-            axe.imshow(inp, cmap='gray')
-            axe.axis('off')
-            axd = fig.add_subplot(3,len(outputs),2*len(outputs)+i)
-            axd.imshow(out, cmap='gray')
-            axd.axis('off')
+        if ptype=='imshow':
+            for i, (inp, out) in enumerate(zip(inputs, outputs),start=1):
+                axe = fig.add_subplot(3,len(inputs),len(inputs)+i)
+                axe.imshow(inp, cmap='gray')
+                axe.axis('off')
+                axd = fig.add_subplot(3,len(outputs),2*len(outputs)+i)
+                axd.imshow(out, cmap='gray')
+                axd.axis('off')
+        elif ptype=='scatter':
+            ax = plt.subplot(132)
+            ax.scatter(inputs[:,0],inputs[:,1])
+            ax.set_aspect('equal')  
+            ax = plt.subplot(133)
+            ax.scatter(outputs[:,0],outputs[:,1])
+            ax.set_aspect('equal') 
             
     def train(self, x_train, x_test, max_epochs, batch_size, threshold=0.001, plot_params = None):
         """
@@ -174,6 +197,7 @@ class VAE:
         :param plot_params: (dict) defaults to None
             If not None, training diagnostics will be displayed
             {
+                'type': (str) 'imshow'|'scatter'
                 'print_epochs': (list) List of epochs for which to show diagnostics
                 'plot_sample': (int) Number of samples to plot
                 'y_test': (np.array) Labels corresponding to x_test
@@ -184,6 +208,7 @@ class VAE:
         if plot_params is not None:
             plot_latent_space = self.latent_params_size == 2
             try:
+                ptype = plot_params['type'].strip().lower()
                 print_epochs = sorted(plot_params['print_epochs'])
                 n_samples = plot_params['plot_samples']
                 y_test = plot_params['y_test']
@@ -192,6 +217,7 @@ class VAE:
                 print("No visualisation will be shown")
                 plot_params = None
             assert(print_epochs[-1]<=max_epochs)
+            assert(ptype=='imshow' or ptype=='scatter')
             # visualisation variables
             encodings = self.posterior.mean()
             decoded = self.make_decoder(encodings,  self.data_shape).mean()
@@ -216,15 +242,20 @@ class VAE:
                           'divergence', np.mean(test_divergence))
                     if plot_latent_space:
                         self.plot_latent(test_latent, y_test, epoch)
-                    fig, bigax = plt.subplots(nrows=3, ncols=1, figsize=(n_samples, 3*1.27), sharey=True)
+                    if ptype=='imshow':
+                        fig, bigax = plt.subplots(nrows=3, ncols=1, figsize=(n_samples, 3*1.27), sharey=True)
+                        for i in range(3):
+                            bigax[i].tick_params(labelcolor=(1.,1.,1., 0.0), top='off', bottom='off', left='off', right='off')
+                            bigax[i]._frameon = False
+                    else:
+                        fig, bigax = plt.subplots(nrows=1, ncols=3, figsize=(20,5), sharey=True)
                     bigax[0].set_title('Epoch {}: generated'.format(epoch))
                     bigax[1].set_title('Epoch {}: input'.format(epoch))
                     bigax[2].set_title('Epoch {}: decoded'.format(epoch))
-                    for i in range(3):
-                        bigax[i].tick_params(labelcolor=(1.,1.,1., 0.0), top='off', bottom='off', left='off', right='off')
-                        bigax[i]._frameon = False
-                    self.plot_samples(fig, test_samples)
-                    self.plot_encode_decode(fig, test_input, test_decoded)
+                    
+
+                    self.plot_samples(fig, test_samples, ptype)
+                    self.plot_encode_decode(fig, test_input, test_decoded, ptype)
                     plt.show()
                 else:
                     print(test_elbo)
@@ -237,10 +268,36 @@ class VAE:
                 perm = np.arange(len(x_train))
                 np.random.shuffle(perm)
                 x_train = x_train[perm]
-        
+            self.saver.save(sess._sess._sess._sess._sess,self.save_path)
         if plot_params is not None:
             plt.figure()
             plt.plot(nelbos)
             plt.xlabel('Epoch')
             plt.ylabel('ELBO')
-    
+            
+    def passthrough(self, x_test):
+        """
+        Returns decoded images corresponding  to the encoded input
+
+        :param x_test: (np.array)
+            Input to encode and decode
+        """
+        with tf.Session() as sess:
+            self.saver.restore(sess, self.save_path)
+            feed = {self.data_placeholder: x_test}
+            encodings = self.posterior.mean()
+            decoded = self.make_decoder(encodings,  self.data_shape).mean()
+            test_decoded = sess.run(decoded, feed)
+            return test_decoded
+            
+    def sample(self, n_samples):
+        """
+        Returns decoded images from random samples in the prior
+
+        :param n_samples: (np.array)
+            Number of samples
+        """
+        with tf.Session() as sess:
+            self.saver.restore(sess, self.save_path)
+            samples = self.make_decoder(self.prior.sample(n_samples), self.data_shape).mean()
+            return samples.eval()

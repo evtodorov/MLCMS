@@ -48,11 +48,8 @@ def linear_fit(x, f):
             Function to be fitted
         
     Returns:
-        :param k: (float)
-            Linear coefficient of f_hat
-
-        :param k: (float)
-            Constant coefficient of f_hat
+        :param f_hat: (numpy array np.shape = (dim, 1)))
+            The linear fit to f(x) over the value of x
 
     '''
 
@@ -110,8 +107,8 @@ def non_linear_fit(x, f, l, eps):
         
         
     Returns:
-        :param rbf: (numpy array np.shape = (dim, 1)))
-            Radial basis function of x, with parameters x_l and eps.
+        :param f_hat: (numpy array np.shape = (dim, 1)))
+            The nonlinear fit to f(x) over the value of x
 
     '''
     

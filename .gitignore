@@ -1,5 +1,6 @@
 .DS_Store
 .vscode
+.ipynb_checkpoints
 __pycache__/
 Exercise_3/kuznetsov-2004.pdf
 Exercise_2/Task_5/output

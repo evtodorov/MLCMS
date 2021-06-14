@@ -27,14 +27,13 @@ def load_to_numpy(path):
     
     print(f'Data loaded with shape {np.shape(data)}')
 
-    #x_es = data.T[0].reshape((len(data), -1))
-    #f = data.T[1].reshape((len(data), -1))
+    x_es = data.T[0].reshape((len(data), -1))
+    f = data.T[1].reshape((len(data), -1))
 
-    #print(f'Returning x_es of shape {np.shape(x_es)} and f(x) of shape {np.shape(f)}')
+    print(f'Returning x_es of shape {np.shape(x_es)} and f(x) of shape {np.shape(f)}')
 
-    return data
+    return x_es, f
 
-def finite_diff()
 
 def linear_fit(x, f):
     '''

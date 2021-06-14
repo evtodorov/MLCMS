@@ -1,4 +1,6 @@
 import numpy as np
+from sklearn.model_selection import train_test_split
+
 
 def load_to_numpy(path):
     '''
@@ -30,9 +32,12 @@ def load_to_numpy(path):
     x_es = data.T[0].reshape((len(data), -1))
     f = data.T[1].reshape((len(data), -1))
 
-    print(f'Returning x_es of shape {np.shape(x_es)} and f(x) of shape {np.shape(f)}')
+    x_train, x_test, f_train, f_test = train_test_split(x_es, f, test_size = 0.2, random_state = 1337)
 
-    return x_es, f
+
+    print(f'Length of training data: {len(x_train)} ({round(100*len(x_train)/len(x_es), 2)}%), validation data: {len(x_test)} ({round(100*len(x_test)/len(f), 2)}%).')
+
+    return x_train, x_test, f_train, f_test
 
 
 def linear_fit(x, f):
@@ -54,7 +59,7 @@ def linear_fit(x, f):
     '''
 
     A = np.vstack([x.T, np.ones(x.T.shape)]).T
-    coeff = np.linalg.lstsq(A, f, rcond=None)[0]
+    coeff = np.linalg.lstsq(A, f, rcond=0.005)[0]
     print(f'Got coefficients for the fit f_hat(x) = k*x + m, as \nk = {coeff[0][0].round(3)}, m = {coeff[1][0].round(3)}')
     f_hat = coeff[0]*x + coeff[1]
 
@@ -122,11 +127,12 @@ def non_linear_fit(x, f, l, eps):
     phi_sums = np.array(phi_sums).reshape(l, N)
     
     # Get the coefficient
-    A = phi_sums.T
-    coeff = np.linalg.lstsq(A, f, rcond=None)[0]
+    A = np.vstack([phi_sums, np.ones((1,N))]).T
+    coeff = np.linalg.lstsq(A, f, rcond=0.005)[0]
 
     # Sum up all the radial basis functions
     func_lst = [rbf_calc(x_l, x, eps)*coeff[i] for i, x_l in enumerate(x_ls)]
-    f_hat = np.sum(np.array(func_lst), axis=0)
+    f_hat = np.sum(np.array(func_lst), axis=0) + coeff[-1] # Add constant term
+
 
     return f_hat

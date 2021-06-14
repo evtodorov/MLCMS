@@ -115,14 +115,14 @@ def non_linear_fit(x, f, l, eps):
     N = x.shape[0]
 
     # Create evenly distributed x_ls
-    x_ls = np.linspace(0, np.max(x), l).reshape(l,1) 
+    x_ls = np.linspace(np.min(x), np.max(x), l).reshape(l,1) 
 
     # Fill a list with phis
     phi_sums = [rbf_calc(x_l, x, eps) for x_l in x_ls]
     phi_sums = np.array(phi_sums).reshape(l, N)
     
     # Get the coefficient
-    A = np.vstack([phi_sums, np.ones(phi_sums.shape)]).T
+    A = phi_sums.T
     coeff = np.linalg.lstsq(A, f, rcond=None)[0]
 
     # Sum up all the radial basis functions

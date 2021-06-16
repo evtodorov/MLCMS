@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.base import BaseEstimator
 
 
 def load_to_numpy(path):
@@ -40,7 +41,7 @@ def load_to_numpy(path):
     return x_train, x_test, f_train, f_test
 
 
-def linear_fit(x, f):
+def linear_fit(x, f, rcond=0.005):
     '''
     Makes a linear fit to f(x) based on the values of x, i.e. makes
     the fit f(x) ~ f_hat(x) = k*x + m 
@@ -51,6 +52,9 @@ def linear_fit(x, f):
 
         :param f: (numpy array np.shape = (dim, 1)))
             Function to be fitted
+            
+        :param rcond: (float) default 0.005
+            Singular value cut-off threshold (rcond parameter for np.linalg.lstsq)
         
     Returns:
         :param f_hat: (numpy array np.shape = (dim, 1)))
@@ -59,7 +63,7 @@ def linear_fit(x, f):
     '''
 
     A = np.vstack([x.T, np.ones(x.T.shape)]).T
-    coeff = np.linalg.lstsq(A, f, rcond=0.005)[0]
+    coeff = np.linalg.lstsq(A, f, rcond=rcond)[0]
     print(f'Got coefficients for the fit f_hat(x) = k*x + m, as \nk = {coeff[0][0].round(3)}, m = {coeff[1][0].round(3)}')
     f_hat = coeff[0]*x + coeff[1]
 
@@ -136,3 +140,81 @@ def non_linear_fit(x, f, l, eps):
 
 
     return f_hat
+
+def MSE(tru, est):
+    '''
+    Compute the mean squared error
+    
+    :param tru: (np.array(shape = (n_samples, dim)))
+        True values
+
+    :param est: (np.array(shape = (n_samples, dim)))
+        Estimated values
+        
+    :return: (float)
+    '''
+    tru = np.array([tru]).T if len(tru.shape) <= 1 else tru
+    est = np.array([est]).T if len(est.shape) <= 1 else est
+    return np.mean(np.linalg.norm(est-tru,axis=1)**2)
+
+
+class RBF(BaseEstimator):
+    def __init__(self, L, eps, rcond=None):
+        '''
+        Create a Radial Basis Function Predictor on random subset of the samples
+        
+        :param l: (int)
+            The number of radial basis functions to be combined
+
+        :param epsilon: (float)
+            The bandwidth of the basis function
+        
+        :param rcond: (float) default None
+            Singular value cut-off threshold (rcond parameter for np.linalg.lstsq)
+        '''
+        self.L = L
+        self.eps = eps
+        self.rcond = rcond
+        
+    def fit(self, x, f):
+        '''
+        Train the predictor
+        
+        :param x: (np.array(shape = (n_samples, dim)))
+            x values
+
+        :param f: (np.array(shape = (n_samples, dim)))
+            Function to be fitted
+        '''
+        # sort the data format
+        assert(x.shape == f.shape)
+        if len(x.shape) <= 1:
+            x = np.array([x]).T 
+            f = np.array([f]).T
+        
+        idx = sorted(np.random.choice(len(x), self.L, replace=False))
+        self.xx = x[idx]
+        phi = self._phi(x).T
+        self.C, res, rank, svals = np.linalg.lstsq(phi, f, rcond=self.rcond)
+        
+    def predict(self, x):
+        '''
+        Predict 
+
+        :param x: (np.array(shape = (n_samples, dim)))
+            Predict x values
+
+        :return f_hat: (np.array(shape = (n_samples, dim)))
+            The nonlinear fit to f(x) over the value of x
+        '''
+        x = np.array([x]).T if len(x.shape) <= 1 else x
+        phi = self._phi(x)
+        f_hat = self.C.T@phi
+        return f_hat.T
+    
+    def _phi(self, x):
+        # Compute the RBF Gaussian kernel
+        phi = np.zeros((self.L,len(x)))
+        for i in range(self.L):
+            phi[i] = np.exp(-np.linalg.norm(self.xx[i]-x, axis=1)**2/self.eps**2)
+        return phi    

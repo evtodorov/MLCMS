@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.base import BaseEstimator
-
 
 def load_to_numpy(path):
     '''
@@ -141,6 +141,7 @@ def non_linear_fit(x, f, l, eps):
 
     return f_hat
 
+
 def MSE(tru, est):
     '''
     Compute the mean squared error
@@ -159,7 +160,7 @@ def MSE(tru, est):
 
 
 class RBF(BaseEstimator):
-    def __init__(self, L, eps, rcond=None):
+    def __init__(self, L, eps, periodic=False, rcond=None):
         '''
         Create a Radial Basis Function Predictor on random subset of the samples
         
@@ -169,12 +170,17 @@ class RBF(BaseEstimator):
         :param epsilon: (float)
             The bandwidth of the basis function
         
+        :param periodic: (bool) default False
+            Fit a periodic kernel, x should be normalized between 0 and π.
+            The forecast will then also be periodic with period of π.
+
         :param rcond: (float) default None
             Singular value cut-off threshold (rcond parameter for np.linalg.lstsq)
         '''
         self.L = L
         self.eps = eps
         self.rcond = rcond
+        self.periodic = periodic
         
     def fit(self, x, f):
         '''
@@ -216,5 +222,9 @@ class RBF(BaseEstimator):
         # Compute the RBF Gaussian kernel
         phi = np.zeros((self.L,len(x)))
         for i in range(self.L):
-            phi[i] = np.exp(-np.linalg.norm(self.xx[i]-x, axis=1)**2/self.eps**2)
+            r = (self.xx[i]-x)
+            if self.periodic:
+                phi[i] = np.exp(-np.sin(np.linalg.norm(r, axis=1))**2/self.eps**2)
+            else:
+                phi[i] = np.exp(-np.linalg.norm(r, axis=1)**2/self.eps**2)
         return phi    

@@ -41,10 +41,32 @@ def load_to_numpy(path):
     return x_train, x_test, f_train, f_test
 
 
+def ret_coeff(x, f, rcond=0.005):
+    '''
+    Return the coefficients of the given linear system by solving A*p = y
+    Input:
+        :param x: (numpy array np.shape = (dim, 1)))
+            x values
+
+        :param f: (numpy array np.shape = (dim, 1)))
+            Function to be fitted
+
+        :param rcond: (float) default 0.005
+            Singular value cut-off threshold (rcond parameter for np.linalg.lstsq)
+
+    Returns:
+        :param coeff: Returns the coefficients of the Linear system
+    '''
+    A = np.vstack([x.T, np.ones(x.T.shape)]).T
+    coeff = np.linalg.lstsq(A, f, rcond=rcond)[0]
+
+    return coeff
+
+
 def linear_fit(x, f, rcond=0.005):
     '''
     Makes a linear fit to f(x) based on the values of x, i.e. makes
-    the fit f(x) ~ f_hat(x) = k*x + m 
+    the fit f(x) ~ f_hat(x) = k*x + m
 
     Input:
         :param x: (numpy array np.shape = (dim, 1)))
@@ -52,20 +74,20 @@ def linear_fit(x, f, rcond=0.005):
 
         :param f: (numpy array np.shape = (dim, 1)))
             Function to be fitted
-            
+
         :param rcond: (float) default 0.005
             Singular value cut-off threshold (rcond parameter for np.linalg.lstsq)
-        
+
     Returns:
         :param f_hat: (numpy array np.shape = (dim, 1)))
             The linear fit to f(x) over the value of x
 
     '''
 
-    A = np.vstack([x.T, np.ones(x.T.shape)]).T
-    coeff = np.linalg.lstsq(A, f, rcond=rcond)[0]
-    print(f'Got coefficients for the fit f_hat(x) = k*x + m, as \nk = {coeff[0][0].round(3)}, m = {coeff[1][0].round(3)}')
-    f_hat = coeff[0]*x + coeff[1]
+    coeff = ret_coeff(x, f, rcond)
+    print(
+        f'Got coefficients for the fit f_hat(x) = k*x + m, as \nk = {coeff[0][0].round(3)}, m = {coeff[1][0].round(3)}')
+    f_hat = coeff[0] * x + coeff[1]
 
     return f_hat
 

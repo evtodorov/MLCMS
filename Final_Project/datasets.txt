@@ -1,0 +1,11 @@
+word2vec:
+https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing
+
+SDSS:
+Some form of postprocessing  used, not actually published
+
+PMLB:
+https://epistasislab.github.io/pmlb/
+poker - poker hands card suit and rank to named hand
+adult - Prediction of whether a person makes over $50K a year, based on 14 other features
+ 

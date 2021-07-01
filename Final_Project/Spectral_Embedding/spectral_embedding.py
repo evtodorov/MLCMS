@@ -4,7 +4,7 @@ from scipy.sparse.linalg import eigsh
 from scipy import sparse
 
 
-def spec_emd(data, n, epsilon = None, t = None):
+def spec_emd(data, n,  t = None, epsilon = None):
     '''
     Function to calculate the spectral embedding space of a given data set.
     The algorithm is inspired by the paper https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.9.5888
@@ -17,11 +17,17 @@ def spec_emd(data, n, epsilon = None, t = None):
     Inputs:
 
         :param data: (np.array with np.shape = (n_samples, n_features))
-            Data to be embedded
+            Data to be embedded.
 
         :param n: (int)
-            Number of eigenfunctions to return
-    
+            Number of eigenfunctions to return.
+
+        :param t: (int)
+            Parameter to use in exponent of the components in the adjacency graph W.
+
+        :param epsilon: (int) (not implemented)
+            Maximum Euclidean distance to add an edge in the adjacency graph W.
+
 
     Returns:
 
@@ -35,24 +41,25 @@ def spec_emd(data, n, epsilon = None, t = None):
         t = 1/data.shape[1]
 
     
-    # Step 1, using (a)
+    # Step 1, using (a).
+    # Generate a adjacency graph W.
     W = distance_matrix(data, data)**2
 
 
     # Step 2, using (b)
+    # Redo adjacency graph W with exponents.
     # W = np.where(W > epsilon, 0, np.exp(-W/t)) This unfortunately doesn't seen to work
     W *= -t
     W = np.exp(W)
 
 
     # Step 3 
-    # Get laplacian and make matrices sparse, return eigenvectors
+    # Get laplacian L and make matrices sparse, return eigenvectors
     D = W@np.ones(W.shape[0])
 
     W = sparse.csr_matrix(W)
     D = sparse.diags(D, format = 'csr')
     L = D - W
-
 
     eigenvalues, eigenvectors = eigsh(L, n+1, which='SM')
 

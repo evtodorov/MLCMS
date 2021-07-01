@@ -4,7 +4,31 @@ from scipy.sparse.linalg import eigsh
 from scipy import sparse
 
 
-def spec_emd(data, n_components, epsilon = None, t = None):
+def spec_emd(data, n, epsilon = None, t = None):
+    '''
+    Function to calculate the spectral embedding space of a given data set.
+    The algorithm is inspired by the paper https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.9.5888
+    by Mikhail Belkin and Partha Niyogi.
+
+
+    The algorithm implements the three steps as described in the paper and returns n eigenfunctions which 
+    can be utilised by the user.
+
+    Inputs:
+
+        :param data: (np.array with np.shape = (n_samples, n_features))
+            Data to be embedded
+
+        :param n: (int)
+            Number of eigenfunctions to return
+    
+
+    Returns:
+
+        :param eigenvectors: (np.array with np.shape = (n_samples, n))
+            Reduced data, spctral embedding space
+    '''
+
     if epsilon is None:
         epsilon = 1/data.shape[1]
     if t is None:
@@ -16,13 +40,13 @@ def spec_emd(data, n_components, epsilon = None, t = None):
 
 
     # Step 2, using (b)
-    # D = np.where(D > epsilon, 0, np.exp(-D/t)) This unfortunately doesn't seen to work
+    # W = np.where(W > epsilon, 0, np.exp(-W/t)) This unfortunately doesn't seen to work
     W *= -t
     W = np.exp(W)
 
 
     # Step 3 
-    # Get laplacian and make matrices sparse
+    # Get laplacian and make matrices sparse, return eigenvectors
     D = W@np.ones(W.shape[0])
 
     W = sparse.csr_matrix(W)
@@ -30,7 +54,7 @@ def spec_emd(data, n_components, epsilon = None, t = None):
     L = D - W
 
 
-    eigenvalues, eigenvectors = eigsh(L, n_components+1, which='SM')
+    eigenvalues, eigenvectors = eigsh(L, n+1, which='SM')
 
     return eigenvectors[:,1:]
 
@@ -44,14 +68,15 @@ def adj_mat(data, epsilon = None, t=None):
 
     
     # Step 1, using (a)
-    D = distance_matrix(data, data)**2
+    W = distance_matrix(data, data)**2
+
 
     # Step 2, using (b)
-    # D = np.where(D > epsilon, 0, np.exp(-D/t)) This unfortunately doesn't seen to work
-    D *= -epsilon
-    D = np.exp(D)
+    # W = np.where(W > epsilon, 0, np.exp(-W/t)) This unfortunately doesn't seen to work
+    W *= -t
+    W = np.exp(W)
 
-    return D
+    return W
 
 
 def spec(W, n_components, epsilon = None, t=None):

@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.spatial import distance_matrix
+import matplotlib.pyplot as plt
 from scipy.sparse.linalg import eigsh
 from scipy import sparse
 
@@ -33,24 +34,21 @@ def spec_emd(data, n,  t = None, epsilon = None):
 
         :param eigenvectors: (np.array with np.shape = (n_samples, n))
             Reduced data, spctral embedding space
-    '''
-
-    if epsilon is None:
-        epsilon = 1/data.shape[1]
-    if t is None:
-        t = 1/data.shape[1]
-
-    
+    '''    
     # Step 1, using (a).
     # Generate a adjacency graph W.
     W = distance_matrix(data, data)**2
 
+    # Set constants epsilon and t if they are None
+    if epsilon is None:
+        epsilon = 0.01*np.max(W)
+
+    if t is None:
+        t = 1
 
     # Step 2, using (b)
     # Redo adjacency graph W with exponents.
-    # W = np.where(W > epsilon, 0, np.exp(-W/t)) This unfortunately doesn't seen to work
-    W *= -t
-    W = np.exp(W)
+    W = np.where(W < epsilon, np.exp(-W/t), 0)
 
 
     # Step 3 
@@ -68,25 +66,28 @@ def spec_emd(data, n,  t = None, epsilon = None):
 ## Splitted functions for separated tesing ##
 
 def adj_mat(data, epsilon = None, t=None):
-    if epsilon is None:
-        epsilon = 1/data.shape[1]
     if t is None:
-        t = 1/data.shape[1]
+        t = 1
 
     
     # Step 1, using (a)
     W = distance_matrix(data, data)**2
+    #plt.imshow(W)
 
+    if epsilon is None:
+        epsilon = 0.1*np.max(W)
+    
 
     # Step 2, using (b)
-    # W = np.where(W > epsilon, 0, np.exp(-W/t)) This unfortunately doesn't seen to work
-    W *= -t
-    W = np.exp(W)
+    W = np.where(W < epsilon, np.exp(-W/t), 0)
+    #np.fill_diagonal(W, 0)
+    #W *= -t
+    #W = np.exp(W)
 
     return W
 
 
-def spec(W, n_components, epsilon = None, t=None):
+def spec(W, n_components):
     n_nodes, m_nodes = W.shape
     D = W@np.ones(n_nodes)
 

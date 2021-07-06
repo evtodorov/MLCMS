@@ -1,0 +1,2 @@
+N, sklearn_mean, sklearn_sd, self_mean, self_sd,
+1000, 

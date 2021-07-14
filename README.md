@@ -17,3 +17,4 @@ Machine modelling for Crowd Modelling and Simulation repository for Group B.
 1. [Exercise 3 branch](https://gitlab.lrz.de/etodorov/MLCMS_GroupB/-/releases/Exercise3_submission) - Completed
 1. [Exercise 4 branch](https://gitlab.lrz.de/etodorov/MLCMS_GroupB/-/releases#Exercise4_submission) - Completed
 1. [Exercise 5 branch](https://gitlab.lrz.de/etodorov/MLCMS_GroupB/-/tags/Exercise5_submission) - Completed
+1. [Final Project branch](https://gitlab.lrz.de/etodorov/MLCMS_GroupB/-/tags/FinalProject_submission) - Completed

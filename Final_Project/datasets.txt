@@ -8,4 +8,4 @@ PMLB:
 https://epistasislab.github.io/pmlb/
 poker - poker hands card suit and rank to named hand
 adult - Prediction of whether a person makes over $50K a year, based on 14 other features
- 
+magic - particle shower measurements used to classify types of radiation
